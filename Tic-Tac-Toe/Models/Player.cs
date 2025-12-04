@@ -13,6 +13,8 @@ namespace Tic_Tac_Toe.Models
         [Required]
         public required string Name { get; set; }
 
+        public ICollection<GameResult> GameResults { get; set; } = new List<GameResult>();
+
         public override string ToString()
         {
             return $"Player ID: {Id}, Player Name: {Name}";

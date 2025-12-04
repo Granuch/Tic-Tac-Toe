@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Tic_Tac_Toe.ViewModels;
 
 namespace Tic_Tac_Toe
 {
@@ -19,6 +20,7 @@ namespace Tic_Tac_Toe
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new GameViewModel();
         }
     }
 }

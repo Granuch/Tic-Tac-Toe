@@ -21,6 +21,43 @@ namespace Tic_Tac_Toe.DbContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Models.Player>(entity =>
+            {
+                entity.HasKey(p => p.Id);
+
+                entity.Property(p => p.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasIndex(p => p.Name);
+            });
+
+            modelBuilder.Entity<Models.GameResult>(entity =>
+            {
+                entity.HasKey(g => g.Id);
+
+                entity.Property(g => g.PlayerX)
+                    .IsRequired();
+
+                entity.Property(g => g.PlayerO)
+                    .IsRequired();
+
+                entity.Property(g => g.Winner)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(g => g.Duration)
+                    .IsRequired();
+
+                entity.Property(g => g.PlayedAt)
+                    .IsRequired();
+
+                entity.HasIndex(g => g.PlayedAt);
+                entity.HasIndex(g => g.PlayerX);
+                entity.HasIndex(g => g.PlayerO);
+            });
         }
     }
 }
