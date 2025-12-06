@@ -60,7 +60,8 @@ namespace Tic_Tac_Toe.ViewModels
                 StatusText = "Завантаження гравців...";
 
                 Debug.WriteLine("Getting Player X...");
-                _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName).ConfigureAwait(false);
+                // УБРАЛИ ConfigureAwait(false) - остаемся в UI потоке!
+                _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName);
                 Debug.WriteLine($"Player X loaded: {_playerX?.Name} (ID: {_playerX?.Id})");
 
                 if (_playerX == null)
@@ -69,7 +70,8 @@ namespace Tic_Tac_Toe.ViewModels
                 }
 
                 Debug.WriteLine("Getting Player O...");
-                _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName).ConfigureAwait(false);
+                // УБРАЛИ ConfigureAwait(false) - остаемся в UI потоке!
+                _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName);
                 Debug.WriteLine($"Player O loaded: {_playerO?.Name} (ID: {_playerO?.Id})");
 
                 if (_playerO == null)
@@ -84,16 +86,11 @@ namespace Tic_Tac_Toe.ViewModels
                 Debug.WriteLine($"Current thread: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
                 Debug.WriteLine($"Is UI thread: {Application.Current.Dispatcher.CheckAccess()}");
 
-                Debug.WriteLine("Calling Dispatcher.InvokeAsync...");
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    Debug.WriteLine("=== INSIDE Dispatcher.InvokeAsync ===");
-                    Debug.WriteLine($"Current thread inside: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-                    StartNewGame();
-                    Debug.WriteLine("=== StartNewGame completed inside Dispatcher ===");
-                });
+                // Теперь мы УЖЕ в UI потоке, можно вызывать напрямую
+                Debug.WriteLine("Calling StartNewGame directly...");
+                StartNewGame();
+                Debug.WriteLine("=== StartNewGame completed ===");
 
-                Debug.WriteLine("=== Dispatcher.InvokeAsync completed ===");
                 Debug.WriteLine("=== InitializeAsync COMPLETE ===");
             }
             catch (Exception ex)
@@ -103,15 +100,12 @@ namespace Tic_Tac_Toe.ViewModels
                 Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                 Debug.WriteLine($"Inner: {ex.InnerException?.Message}");
 
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    StatusText = "Помилка ініціалізації!";
+                StatusText = "Помилка ініціалізації!";
 
-                    MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner: {ex.InnerException?.Message}",
-                        "Помилка",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                });
+                MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner: {ex.InnerException?.Message}",
+                    "Помилка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
 
                 throw;
             }

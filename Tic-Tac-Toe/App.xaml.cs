@@ -8,9 +8,10 @@ namespace Tic_Tac_Toe
 {
     public partial class App : Application
     {
-        private void Application_Startup(object sender, StartupEventArgs e)
+        private async void Application_Startup(object sender, StartupEventArgs e)
         {
-            this.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            // ВАЖНО: Используем OnExplicitShutdown чтобы окно не могло закрыться случайно
+            this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             try
             {
@@ -38,22 +39,26 @@ namespace Tic_Tac_Toe
                     this.MainWindow = mainWindow;
                     System.Diagnostics.Debug.WriteLine("MainWindow set as Application.MainWindow");
 
-                    // Показываем окно СНАЧАЛА
                     mainWindow.Show();
                     System.Diagnostics.Debug.WriteLine("MainWindow shown");
 
-                    // КРИТИЧЕСКИ ВАЖНО: используем GetAwaiter().GetResult() вместо await
-                    // Это блокирует поток до завершения инициализации
+                    // КРИТИЧЕСКИ ВАЖНО: await вместо fire-and-forget
+                    System.Diagnostics.Debug.WriteLine("=== Starting initialization ===");
+
                     try
                     {
-                        System.Diagnostics.Debug.WriteLine("=== Starting initialization ===");
-
-                        viewModel.InitializeAsync(
+                        await viewModel.InitializeAsync(
                             selectionWindow.PlayerXName,
                             selectionWindow.PlayerOName,
                             selectionWindow.IsPlayingWithBot,
                             selectionWindow.BotDifficulty
-                        ).GetAwaiter().GetResult();
+                        );
+
+                        // Разрешаем закрытие окна после инициализации
+                        mainWindow.IsInitialized = true;
+
+                        // Теперь можно вернуть нормальный режим shutdown
+                        this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
                         System.Diagnostics.Debug.WriteLine("=== Initialization completed successfully! ===");
                     }
@@ -62,6 +67,7 @@ namespace Tic_Tac_Toe
                         System.Diagnostics.Debug.WriteLine($"=== ERROR during initialization ===");
                         System.Diagnostics.Debug.WriteLine($"Message: {initEx.Message}");
                         System.Diagnostics.Debug.WriteLine($"StackTrace: {initEx.StackTrace}");
+                        System.Diagnostics.Debug.WriteLine($"Inner: {initEx.InnerException?.Message}");
 
                         MessageBox.Show(
                             $"Помилка ініціалізації: {initEx.Message}\n\n{initEx.StackTrace}",
@@ -69,6 +75,8 @@ namespace Tic_Tac_Toe
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
 
+                        // При ошибке возвращаем нормальный режим и закрываем
+                        this.ShutdownMode = ShutdownMode.OnMainWindowClose;
                         mainWindow.Close();
                         Shutdown();
                     }

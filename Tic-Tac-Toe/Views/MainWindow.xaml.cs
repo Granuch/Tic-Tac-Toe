@@ -15,6 +15,8 @@ namespace Tic_Tac_Toe
 {
     public partial class MainWindow : Window
     {
+        public bool IsInitialized { get; set; } = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -30,7 +32,10 @@ namespace Tic_Tac_Toe
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("=== MainWindow.Window_Closing called ===");
-            System.Diagnostics.Debug.WriteLine($"Stack trace: {Environment.StackTrace}");
+            System.Diagnostics.Debug.WriteLine($"IsInitialized: {IsInitialized}");
+
+            // Больше не блокируем закрытие, так как ShutdownMode=OnExplicitShutdown
+            // защищает нас до завершения инициализации
         }
 
         protected override void OnContentRendered(EventArgs e)

@@ -84,12 +84,14 @@ namespace Tic_Tac_Toe.Services
             try
             {
                 System.Diagnostics.Debug.WriteLine($"=== GetOrCreatePlayerAsync START for: {name} ===");
+                System.Diagnostics.Debug.WriteLine($"Thread ID: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
-                using var connection = new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
+                var connection = new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
+                System.Diagnostics.Debug.WriteLine($"Connection created. State: {connection.State}");
 
                 System.Diagnostics.Debug.WriteLine("Opening connection...");
-                await connection.OpenAsync().ConfigureAwait(false);
-                System.Diagnostics.Debug.WriteLine("Connection opened successfully");
+                await connection.OpenAsync();
+                System.Diagnostics.Debug.WriteLine($"Connection opened successfully. State: {connection.State}");
 
                 // Поиск игрока
                 using var selectCmd = new Microsoft.Data.SqlClient.SqlCommand(
@@ -99,39 +101,62 @@ namespace Tic_Tac_Toe.Services
 
                 System.Diagnostics.Debug.WriteLine("Executing SELECT...");
                 Player? player = null;
-                using (var reader = await selectCmd.ExecuteReaderAsync().ConfigureAwait(false))
+
+                try
                 {
-                    if (await reader.ReadAsync().ConfigureAwait(false))
+                    using (var reader = await selectCmd.ExecuteReaderAsync())
                     {
-                        player = new Player
+                        System.Diagnostics.Debug.WriteLine("Reader obtained");
+                        if (await reader.ReadAsync())
                         {
-                            Id = reader.GetInt32(0),
-                            Name = reader.GetString(1)
-                        };
-                        System.Diagnostics.Debug.WriteLine($"Player found: {player.Name} (ID: {player.Id})");
+                            player = new Player
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1)
+                            };
+                            System.Diagnostics.Debug.WriteLine($"Player found: {player.Name} (ID: {player.Id})");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("Player not found");
+                        }
                     }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("Player not found");
-                    }
+                }
+                catch (Exception readerEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ERROR in reader: {readerEx.Message}");
+                    throw;
                 }
 
                 if (player == null)
                 {
                     System.Diagnostics.Debug.WriteLine("Creating new player...");
-                    using var insertCmd = new Microsoft.Data.SqlClient.SqlCommand(
-                        "INSERT INTO Players (Name) VALUES (@name); SELECT CAST(SCOPE_IDENTITY() as int);",
-                        connection);
-                    insertCmd.Parameters.AddWithValue("@name", name);
+                    try
+                    {
+                        using var insertCmd = new Microsoft.Data.SqlClient.SqlCommand(
+                            "INSERT INTO Players (Name) VALUES (@name); SELECT CAST(SCOPE_IDENTITY() as int);",
+                            connection);
+                        insertCmd.Parameters.AddWithValue("@name", name);
 
-                    var newId = (int)(await insertCmd.ExecuteScalarAsync().ConfigureAwait(false));
-                    System.Diagnostics.Debug.WriteLine($"Player saved with ID: {newId}");
+                        var result = await insertCmd.ExecuteScalarAsync();
+                        System.Diagnostics.Debug.WriteLine($"ExecuteScalar result: {result}, type: {result?.GetType()}");
 
-                    player = new Player { Id = newId, Name = name };
+                        var newId = Convert.ToInt32(result);
+                        System.Diagnostics.Debug.WriteLine($"Player saved with ID: {newId}");
+
+                        player = new Player { Id = newId, Name = name };
+                    }
+                    catch (Exception insertEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ERROR in insert: {insertEx.Message}");
+                        throw;
+                    }
                 }
 
-                await connection.CloseAsync().ConfigureAwait(false);
-                System.Diagnostics.Debug.WriteLine("Connection closed");
+                System.Diagnostics.Debug.WriteLine("Closing connection...");
+                await connection.CloseAsync();
+                connection.Dispose();
+                System.Diagnostics.Debug.WriteLine("Connection closed and disposed");
                 System.Diagnostics.Debug.WriteLine($"=== GetOrCreatePlayerAsync END: {player.Name} (ID: {player.Id}) ===");
 
                 return player;
@@ -152,6 +177,7 @@ namespace Tic_Tac_Toe.Services
             try
             {
                 using var context = CreateContext();
+                // Здесь ConfigureAwait(false) можно оставить, т.к. результат не используется в UI потоке напрямую
                 return await context.Players.ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
