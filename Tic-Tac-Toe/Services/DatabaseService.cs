@@ -88,7 +88,7 @@ namespace Tic_Tac_Toe.Services
                 using var connection = new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
 
                 System.Diagnostics.Debug.WriteLine("Opening connection...");
-                await connection.OpenAsync();
+                await connection.OpenAsync().ConfigureAwait(false);
                 System.Diagnostics.Debug.WriteLine("Connection opened successfully");
 
                 // Поиск игрока
@@ -99,9 +99,9 @@ namespace Tic_Tac_Toe.Services
 
                 System.Diagnostics.Debug.WriteLine("Executing SELECT...");
                 Player? player = null;
-                using (var reader = await selectCmd.ExecuteReaderAsync())
+                using (var reader = await selectCmd.ExecuteReaderAsync().ConfigureAwait(false))
                 {
-                    if (await reader.ReadAsync())
+                    if (await reader.ReadAsync().ConfigureAwait(false))
                     {
                         player = new Player
                         {
@@ -124,13 +124,13 @@ namespace Tic_Tac_Toe.Services
                         connection);
                     insertCmd.Parameters.AddWithValue("@name", name);
 
-                    var newId = (int)(await insertCmd.ExecuteScalarAsync());
+                    var newId = (int)(await insertCmd.ExecuteScalarAsync().ConfigureAwait(false));
                     System.Diagnostics.Debug.WriteLine($"Player saved with ID: {newId}");
 
                     player = new Player { Id = newId, Name = name };
                 }
 
-                await connection.CloseAsync();
+                await connection.CloseAsync().ConfigureAwait(false);
                 System.Diagnostics.Debug.WriteLine("Connection closed");
                 System.Diagnostics.Debug.WriteLine($"=== GetOrCreatePlayerAsync END: {player.Name} (ID: {player.Id}) ===");
 
@@ -152,7 +152,7 @@ namespace Tic_Tac_Toe.Services
             try
             {
                 using var context = CreateContext();
-                return await context.Players.ToListAsync();
+                return await context.Players.ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -178,7 +178,7 @@ namespace Tic_Tac_Toe.Services
                 };
 
                 context.GameResults.Add(gameResult);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -196,7 +196,8 @@ namespace Tic_Tac_Toe.Services
                 return await context.GameResults
                     .Where(g => g.PlayerX == playerId || g.PlayerO == playerId)
                     .OrderByDescending(g => g.PlayedAt)
-                    .ToListAsync();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -213,7 +214,8 @@ namespace Tic_Tac_Toe.Services
 
                 var games = await context.GameResults
                     .Where(g => g.PlayerX == playerId || g.PlayerO == playerId)
-                    .ToListAsync();
+                    .ToListAsync()
+                    .ConfigureAwait(false);
 
                 var stats = new Dictionary<string, int>
                 {

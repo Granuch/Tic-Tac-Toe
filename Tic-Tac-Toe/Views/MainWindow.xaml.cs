@@ -13,20 +13,12 @@ using Tic_Tac_Toe.Views;
 
 namespace Tic_Tac_Toe
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
             System.Diagnostics.Debug.WriteLine("MainWindow constructor called");
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            System.Diagnostics.Debug.WriteLine("MainWindow.Loaded event fired - window is now stable");
         }
 
         private void Statistics_Click(object sender, RoutedEventArgs e)
@@ -37,7 +29,20 @@ namespace Tic_Tac_Toe
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("MainWindow is closing");
+            System.Diagnostics.Debug.WriteLine("=== MainWindow.Window_Closing called ===");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {Environment.StackTrace}");
+        }
+
+        protected override void OnContentRendered(EventArgs e)
+        {
+            base.OnContentRendered(e);
+            System.Diagnostics.Debug.WriteLine("=== MainWindow.OnContentRendered ===");
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            System.Diagnostics.Debug.WriteLine("=== MainWindow.OnActivated ===");
         }
     }
 }

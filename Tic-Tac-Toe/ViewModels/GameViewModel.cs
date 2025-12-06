@@ -60,7 +60,7 @@ namespace Tic_Tac_Toe.ViewModels
                 StatusText = "Завантаження гравців...";
 
                 Debug.WriteLine("Getting Player X...");
-                _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName);
+                _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName).ConfigureAwait(false);
                 Debug.WriteLine($"Player X loaded: {_playerX?.Name} (ID: {_playerX?.Id})");
 
                 if (_playerX == null)
@@ -69,7 +69,7 @@ namespace Tic_Tac_Toe.ViewModels
                 }
 
                 Debug.WriteLine("Getting Player O...");
-                _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName);
+                _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName).ConfigureAwait(false);
                 Debug.WriteLine($"Player O loaded: {_playerO?.Name} (ID: {_playerO?.Id})");
 
                 if (_playerO == null)
@@ -81,8 +81,19 @@ namespace Tic_Tac_Toe.ViewModels
                 _isInitialized = true;
 
                 Debug.WriteLine("Starting new game...");
-                StartNewGame();
+                Debug.WriteLine($"Current thread: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+                Debug.WriteLine($"Is UI thread: {Application.Current.Dispatcher.CheckAccess()}");
 
+                Debug.WriteLine("Calling Dispatcher.InvokeAsync...");
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    Debug.WriteLine("=== INSIDE Dispatcher.InvokeAsync ===");
+                    Debug.WriteLine($"Current thread inside: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+                    StartNewGame();
+                    Debug.WriteLine("=== StartNewGame completed inside Dispatcher ===");
+                });
+
+                Debug.WriteLine("=== Dispatcher.InvokeAsync completed ===");
                 Debug.WriteLine("=== InitializeAsync COMPLETE ===");
             }
             catch (Exception ex)
@@ -92,12 +103,15 @@ namespace Tic_Tac_Toe.ViewModels
                 Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                 Debug.WriteLine($"Inner: {ex.InnerException?.Message}");
 
-                StatusText = "Помилка ініціалізації!";
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    StatusText = "Помилка ініціалізації!";
 
-                MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner: {ex.InnerException?.Message}",
-                    "Помилка",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                    MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner: {ex.InnerException?.Message}",
+                        "Помилка",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                });
 
                 throw;
             }
@@ -105,7 +119,10 @@ namespace Tic_Tac_Toe.ViewModels
 
         private void StartNewGame()
         {
-            Debug.WriteLine("StartNewGame called");
+            Debug.WriteLine("=== StartNewGame called ===");
+            Debug.WriteLine($"_isInitialized: {_isInitialized}");
+            Debug.WriteLine($"_playerX: {_playerX?.Name ?? "null"}");
+            Debug.WriteLine($"_playerO: {_playerO?.Name ?? "null"}");
 
             if (!_isInitialized || _playerX == null || _playerO == null)
             {
@@ -115,13 +132,27 @@ namespace Tic_Tac_Toe.ViewModels
                 return;
             }
 
+            Debug.WriteLine("Resetting board...");
             _engine.ResetBoard();
+
+            Debug.WriteLine("Updating board UI...");
             UpdateBoard();
+
+            Debug.WriteLine("Setting game active...");
             _isGameActive = true;
+
+            Debug.WriteLine("Starting timer...");
             _gameTimer.Restart();
+
+            Debug.WriteLine($"Setting status text to: Хід гравця {_playerX.Name} (X)");
             StatusText = $"Хід гравця {_playerX.Name} (X)";
 
-            Debug.WriteLine($"Game started: {_playerX.Name} vs {_playerO.Name}");
+            Debug.WriteLine($"=== Game started: {_playerX.Name} vs {_playerO.Name} ===");
+            Debug.WriteLine($"Board count: {Board.Count}");
+            for (int i = 0; i < Board.Count; i++)
+            {
+                Debug.WriteLine($"Board[{i}] = '{Board[i]}'");
+            }
         }
 
         private async void OnCellClicked(object? param)
@@ -168,9 +199,11 @@ namespace Tic_Tac_Toe.ViewModels
 
         private void UpdateBoard()
         {
+            Debug.WriteLine("=== UpdateBoard called ===");
             for (int i = 0; i < 9; i++)
             {
                 Board[i] = _engine.Board[i] == '\0' ? "" : _engine.Board[i].ToString();
+                Debug.WriteLine($"Updated Board[{i}] = '{Board[i]}'");
             }
         }
 
@@ -186,14 +219,17 @@ namespace Tic_Tac_Toe.ViewModels
                     _playerO.Id,
                     winner,
                     _gameTimer.Elapsed
-                );
+                ).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка збереження результату: {ex.Message}",
-                    "Помилка",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    MessageBox.Show($"Помилка збереження результату: {ex.Message}",
+                        "Помилка",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                });
             }
         }
 

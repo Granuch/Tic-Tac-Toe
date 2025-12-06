@@ -1,7 +1,6 @@
 ﻿using System.Configuration;
 using System.Data;
 using System.Windows;
-using System.Windows.Threading;
 using Tic_Tac_Toe.Views;
 using Tic_Tac_Toe.ViewModels;
 
@@ -11,7 +10,6 @@ namespace Tic_Tac_Toe
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            // ВАЖНО: чтобы приложение не закрылось при закрытии первого окна
             this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             try
@@ -37,67 +35,43 @@ namespace Tic_Tac_Toe
                     };
                     System.Diagnostics.Debug.WriteLine("MainWindow created");
 
-                    // Устанавливаем MainWindow как главное окно приложения
                     this.MainWindow = mainWindow;
                     System.Diagnostics.Debug.WriteLine("MainWindow set as Application.MainWindow");
 
-                    // Показываем окно
+                    // Показываем окно СНАЧАЛА
                     mainWindow.Show();
                     System.Diagnostics.Debug.WriteLine("MainWindow shown");
 
-                    // ФИНАЛЬНОЕ РЕШЕНИЕ: Используем DispatcherTimer
-                    System.Diagnostics.Debug.WriteLine("Setting up timer for initialization...");
-                    var timer = new DispatcherTimer
+                    // КРИТИЧЕСКИ ВАЖНО: используем GetAwaiter().GetResult() вместо await
+                    // Это блокирует поток до завершения инициализации
+                    try
                     {
-                        Interval = TimeSpan.FromMilliseconds(100) // 100ms задержка
-                    };
+                        System.Diagnostics.Debug.WriteLine("=== Starting initialization ===");
 
-                    timer.Tick += async (s, args) =>
+                        viewModel.InitializeAsync(
+                            selectionWindow.PlayerXName,
+                            selectionWindow.PlayerOName,
+                            selectionWindow.IsPlayingWithBot,
+                            selectionWindow.BotDifficulty
+                        ).GetAwaiter().GetResult();
+
+                        System.Diagnostics.Debug.WriteLine("=== Initialization completed successfully! ===");
+                    }
+                    catch (Exception initEx)
                     {
-                        timer.Stop(); // Останавливаем таймер сразу
+                        System.Diagnostics.Debug.WriteLine($"=== ERROR during initialization ===");
+                        System.Diagnostics.Debug.WriteLine($"Message: {initEx.Message}");
+                        System.Diagnostics.Debug.WriteLine($"StackTrace: {initEx.StackTrace}");
 
-                        try
-                        {
-                            System.Diagnostics.Debug.WriteLine("=== TIMER FIRED - Starting initialization ===");
+                        MessageBox.Show(
+                            $"Помилка ініціалізації: {initEx.Message}\n\n{initEx.StackTrace}",
+                            "Помилка",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
 
-                            await viewModel.InitializeAsync(
-                                selectionWindow.PlayerXName,
-                                selectionWindow.PlayerOName,
-                                selectionWindow.IsPlayingWithBot,
-                                selectionWindow.BotDifficulty
-                            );
-
-                            System.Diagnostics.Debug.WriteLine("=== Initialization completed successfully! ===");
-                        }
-                        catch (Exception initEx)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"=== ERROR during initialization ===");
-                            System.Diagnostics.Debug.WriteLine($"Message: {initEx.Message}");
-                            System.Diagnostics.Debug.WriteLine($"StackTrace: {initEx.StackTrace}");
-                            MessageBox.Show($"Помилка ініціалізації: {initEx.Message}\n\n{initEx.StackTrace}",
-                                "Помилка",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-                            mainWindow.Close();
-                        }
-                    };
-
-                    timer.Start();
-                    System.Diagnostics.Debug.WriteLine("Timer started - initialization will happen in 100ms");
-
-                    // КРИТИЧЕСКИ ВАЖНО: Принудительно обрабатываем очередь dispatcher
-                    // Это позволяет таймеру сработать ДО закрытия приложения
-                    System.Diagnostics.Debug.WriteLine("Processing dispatcher queue to let timer fire...");
-                    var frame = new DispatcherFrame();
-                    Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, new DispatcherOperationCallback(obj =>
-                    {
-                        ((DispatcherFrame)obj).Continue = false;
-                        return null;
-                    }), frame);
-                    Dispatcher.PushFrame(frame);
-                    System.Diagnostics.Debug.WriteLine("Dispatcher queue processed");
-
-                    System.Diagnostics.Debug.WriteLine("Application_Startup completed");
+                        mainWindow.Close();
+                        Shutdown();
+                    }
                 }
                 else
                 {
@@ -112,10 +86,12 @@ namespace Tic_Tac_Toe
                 System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                 System.Diagnostics.Debug.WriteLine($"Inner: {ex.InnerException?.Message}");
 
-                MessageBox.Show($"Помилка запуску додатку: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner Exception: {ex.InnerException?.Message}",
+                MessageBox.Show(
+                    $"Помилка запуску додатку: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner Exception: {ex.InnerException?.Message}",
                     "Критична помилка",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
+
                 Shutdown();
             }
         }
