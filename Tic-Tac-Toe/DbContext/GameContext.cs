@@ -8,7 +8,6 @@ namespace Tic_Tac_Toe.DbContext
     public class GameContext : Microsoft.EntityFrameworkCore.DbContext
     {
         public GameContext(DbContextOptions<GameContext> options) : base(options) { }
-        public GameContext() { }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

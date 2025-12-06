@@ -1,0 +1,48 @@
+﻿<Window x:Class="Tic_Tac_Toe.Views.StatisticsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Статистика" Height="400" Width="500"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Виберіть гравця:" 
+                   FontSize="16" FontWeight="Bold"/>
+
+        <ComboBox Grid.Row="2" x:Name="CmbPlayers" 
+                  FontSize="14" 
+                  SelectionChanged="CmbPlayers_SelectionChanged"
+                  DisplayMemberPath="Name"/>
+
+        <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="PanelStats">
+                <TextBlock x:Name="TxtStats" 
+                          FontSize="14" 
+                          TextWrapping="Wrap"
+                          Text="Оберіть гравця для перегляду статистики"/>
+
+                <TextBlock x:Name="TxtHistory" 
+                          FontSize="12" 
+                          TextWrapping="Wrap"
+                          Margin="0,20,0,0"
+                          Foreground="Gray"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Button Grid.Row="6" Content="Закрити" 
+                Click="Close_Click"
+                FontSize="14" 
+                Padding="10"
+                HorizontalAlignment="Center"
+                Width="120"/>
+    </Grid>
+</Window>

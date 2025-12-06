@@ -9,7 +9,7 @@ namespace Tic_Tac_Toe.Models
     public class GameResult
     {
         [Key]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public required int PlayerX { get; set; }

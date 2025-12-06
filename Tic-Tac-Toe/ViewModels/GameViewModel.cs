@@ -1,17 +1,25 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
-using Tic_Tac_Toe;
+using Tic_Tac_Toe.Models;
+using Tic_Tac_Toe.Services;
 
 namespace Tic_Tac_Toe.ViewModels
 {
-    public class GameViewModel : INotifyPropertyChanged
+    public class GameViewModel : ObjectObserver
     {
         private readonly GameEngine _engine;
+        private readonly DatabaseService _dbService;
+        private readonly Stopwatch _gameTimer;
+
+        private Player _playerX;
+        private Player _playerO;
+        private bool _isGameActive;
 
         public ObservableCollection<string> Board { get; set; }
-
         public ICommand CellClickCommand { get; }
         public ICommand RestartCommand { get; }
 
@@ -27,16 +35,54 @@ namespace Tic_Tac_Toe.ViewModels
         public GameViewModel()
         {
             _engine = new GameEngine();
-            Board = new ObservableCollection<string>(new string[9]);
+            _dbService = new DatabaseService();
+            _gameTimer = new Stopwatch();
 
+            Board = new ObservableCollection<string>(new string[9]);
             CellClickCommand = new RelayCommand(OnCellClicked);
             RestartCommand = new RelayCommand(_ => Restart());
 
-            StatusText = "Player X's turn";
+            _isGameActive = false;
+            StatusText = "Натисніть 'Restart' для початку гри";
         }
 
-        private void OnCellClicked(object param)
+        public async void Initialize(string playerXName, string playerOName, bool isPlayingWithBot, int botDifficulty)
         {
+            try
+            {
+                _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName);
+                _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName);
+
+                StartNewGame();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}\n\n{ex.StackTrace}", 
+                    "Помилка", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void StartNewGame()
+        {
+            if (_playerX == null || _playerO == null)
+            {
+                StatusText = "Помилка: гравці не ініціалізовані";
+                return;
+            }
+
+            _engine.ResetBoard();
+            UpdateBoard();
+            _isGameActive = true;
+            _gameTimer.Restart();
+            StatusText = $"{_playerX.Name}'s turn (X)";
+        }
+
+        private async void OnCellClicked(object param)
+        {
+            if (!_isGameActive) return;
+
             int index = int.Parse(param.ToString());
 
             if (!_engine.MakeMove(index))
@@ -46,25 +92,29 @@ namespace Tic_Tac_Toe.ViewModels
 
             if (_engine.CheckWinner())
             {
-                StatusText = $"Player {_engine.CurrentPlayer} wins!";
+                _gameTimer.Stop();
+                _isGameActive = false;
+
+                var winner = _engine.CurrentPlayer == 'X' ? _playerX : _playerO;
+                StatusText = $"{winner.Name} wins!";
+
+                await SaveGameResult(winner.Id.ToString());
                 return;
             }
 
             if (_engine.CheckDraw())
             {
+                _gameTimer.Stop();
+                _isGameActive = false;
                 StatusText = "Draw!";
+
+                await SaveGameResult("Draw");
                 return;
             }
 
             _engine.SwitchPlayer();
-            StatusText = $"Player {_engine.CurrentPlayer}'s turn";
-        }
-
-        private void Restart()
-        {
-            _engine.ResetBoard();
-            UpdateBoard();
-            StatusText = "Player X's turn";
+            var currentPlayerName = _engine.CurrentPlayer == 'X' ? _playerX.Name : _playerO.Name;
+            StatusText = $"{currentPlayerName}'s turn ({_engine.CurrentPlayer})";
         }
 
         private void UpdateBoard()
@@ -75,20 +125,29 @@ namespace Tic_Tac_Toe.ViewModels
             }
         }
 
-        private void OnPropertyChanged([CallerMemberName] string prop = "") =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-    }
+        private async Task SaveGameResult(string winner)
+        {
+            try
+            {
+                await _dbService.SaveGameResultAsync(
+                    _playerX.Id,
+                    _playerO.Id,
+                    winner,
+                    _gameTimer.Elapsed
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Помилка збереження результату: {ex.Message}", 
+                    "Помилка", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Warning);
+            }
+        }
 
-    public class RelayCommand : ICommand
-    {
-        private readonly Action<object> _action;
-
-        public RelayCommand(Action<object> action) => _action = action;
-
-        public bool CanExecute(object parameter) => true;
-
-        public event EventHandler CanExecuteChanged;
-
-        public void Execute(object parameter) => _action(parameter);
+        private void Restart()
+        {
+            StartNewGame();
+        }
     }
 }

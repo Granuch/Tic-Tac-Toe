@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Tic_Tac_Toe.ViewModels;
+using Tic_Tac_Toe.Views;
 
 namespace Tic_Tac_Toe
 {
@@ -21,6 +22,12 @@ namespace Tic_Tac_Toe
         {
             InitializeComponent();
             DataContext = new GameViewModel();
+        }
+
+        private void Statistics_Click(object sender, RoutedEventArgs e)
+        {
+            var statsWindow = new StatisticsWindow();
+            statsWindow.ShowDialog();
         }
     }
 }

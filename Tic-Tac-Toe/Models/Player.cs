@@ -8,12 +8,12 @@ namespace Tic_Tac_Toe.Models
     public class Player
     {
         [Key]
-        public required int Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public required string Name { get; set; }
 
-        public ICollection<GameResult> GameResults { get; set; } = new List<GameResult>();
+        public ICollection<GameResult>? GameResults { get; set; } = new List<GameResult>();
 
         public override string ToString()
         {

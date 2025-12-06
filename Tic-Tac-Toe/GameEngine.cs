@@ -6,7 +6,7 @@ namespace Tic_Tac_Toe
 {
     public class GameEngine
     {
-        public char[] Board { get; private set; } // 9 cells
+        public char[] Board { get; private set; }
         public char CurrentPlayer { get; private set; }
 
         public GameEngine()
