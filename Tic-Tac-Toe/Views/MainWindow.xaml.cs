@@ -21,13 +21,23 @@ namespace Tic_Tac_Toe
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new GameViewModel();
+            System.Diagnostics.Debug.WriteLine("MainWindow constructor called");
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("MainWindow.Loaded event fired - window is now stable");
         }
 
         private void Statistics_Click(object sender, RoutedEventArgs e)
         {
             var statsWindow = new StatisticsWindow();
             statsWindow.ShowDialog();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("MainWindow is closing");
         }
     }
 }

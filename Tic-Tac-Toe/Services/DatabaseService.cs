@@ -37,7 +37,6 @@ namespace Tic_Tac_Toe.Services
                 using var context = CreateContext();
 
                 System.Diagnostics.Debug.WriteLine("Testing database connection...");
-                // Пробуем открыть соединение
                 var canConnect = context.Database.CanConnect();
                 System.Diagnostics.Debug.WriteLine($"Can connect: {canConnect}");
 
@@ -45,7 +44,6 @@ namespace Tic_Tac_Toe.Services
                 {
                     System.Diagnostics.Debug.WriteLine("Database connection successful");
 
-                    // Проверяем, существуют ли таблицы
                     try
                     {
                         var playerCount = context.Players.Count();
@@ -83,87 +81,70 @@ namespace Tic_Tac_Toe.Services
 
         public async Task<Player> GetOrCreatePlayerAsync(string name)
         {
-            var result = await Task.Run(() =>
+            try
             {
-                Microsoft.Data.SqlClient.SqlConnection? connection = null;
-                try
+                System.Diagnostics.Debug.WriteLine($"=== GetOrCreatePlayerAsync START for: {name} ===");
+
+                using var connection = new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
+
+                System.Diagnostics.Debug.WriteLine("Opening connection...");
+                await connection.OpenAsync();
+                System.Diagnostics.Debug.WriteLine("Connection opened successfully");
+
+                // Поиск игрока
+                using var selectCmd = new Microsoft.Data.SqlClient.SqlCommand(
+                    "SELECT Id, Name FROM Players WHERE Name = @name",
+                    connection);
+                selectCmd.Parameters.AddWithValue("@name", name);
+
+                System.Diagnostics.Debug.WriteLine("Executing SELECT...");
+                Player? player = null;
+                using (var reader = await selectCmd.ExecuteReaderAsync())
                 {
-                    System.Diagnostics.Debug.WriteLine($"GetOrCreatePlayerAsync called for: {name}");
+                    if (await reader.ReadAsync())
+                    {
+                        player = new Player
+                        {
+                            Id = reader.GetInt32(0),
+                            Name = reader.GetString(1)
+                        };
+                        System.Diagnostics.Debug.WriteLine($"Player found: {player.Name} (ID: {player.Id})");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Player not found");
+                    }
+                }
 
-                    connection = new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
-                    System.Diagnostics.Debug.WriteLine("Opening connection with timeout...");
-                    connection.Open();
-                    System.Diagnostics.Debug.WriteLine("Connection opened successfully");
-
-                    // Поиск игрока
-                    using var selectCmd = new Microsoft.Data.SqlClient.SqlCommand(
-                        "SELECT Id, Name FROM Players WHERE Name = @name",
+                if (player == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Creating new player...");
+                    using var insertCmd = new Microsoft.Data.SqlClient.SqlCommand(
+                        "INSERT INTO Players (Name) VALUES (@name); SELECT CAST(SCOPE_IDENTITY() as int);",
                         connection);
-                    selectCmd.Parameters.AddWithValue("@name", name);
-                    selectCmd.CommandTimeout = 5;
+                    insertCmd.Parameters.AddWithValue("@name", name);
 
-                    System.Diagnostics.Debug.WriteLine("Executing SELECT...");
-                    Player? player = null;
-                    using (var reader = selectCmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            player = new Player
-                            {
-                                Id = reader.GetInt32(0),
-                                Name = reader.GetString(1)
-                            };
-                        }
-                    }
-                    System.Diagnostics.Debug.WriteLine($"Search complete. Player found: {player != null}");
+                    var newId = (int)(await insertCmd.ExecuteScalarAsync());
+                    System.Diagnostics.Debug.WriteLine($"Player saved with ID: {newId}");
 
-                    if (player == null)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Creating new player...");
-                        using var insertCmd = new Microsoft.Data.SqlClient.SqlCommand(
-                            "INSERT INTO Players (Name) VALUES (@name); SELECT CAST(SCOPE_IDENTITY() as int);",
-                            connection);
-                        insertCmd.Parameters.AddWithValue("@name", name);
-                        insertCmd.CommandTimeout = 5;
-
-                        var newId = (int)insertCmd.ExecuteScalar();
-                        System.Diagnostics.Debug.WriteLine($"Player saved with ID: {newId}");
-
-                        player = new Player { Id = newId, Name = name };
-                    }
-
-                    connection.Close();
-                    System.Diagnostics.Debug.WriteLine("Connection closed");
-                    System.Diagnostics.Debug.WriteLine($"Returning player: {player.Name} (ID: {player.Id})");
-                    return player;
+                    player = new Player { Id = newId, Name = name };
                 }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ERROR in GetOrCreatePlayerAsync: {ex.Message}");
-                    System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-                    System.Diagnostics.Debug.WriteLine($"Inner: {ex.InnerException?.Message}");
-                    throw;
-                }
-                finally
-                {
-                    if (connection != null && connection.State == System.Data.ConnectionState.Open)
-                    {
-                        try
-                        {
-                            connection.Close();
-                            connection.Dispose();
-                            System.Diagnostics.Debug.WriteLine("Connection properly disposed in finally block");
-                        }
-                        catch (Exception disposeEx)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Error disposing connection: {disposeEx.Message}");
-                        }
-                    }
-                }
-            });
 
-            System.Diagnostics.Debug.WriteLine($"Task.Run completed, got result: {result?.Name} (ID: {result?.Id})");
-            return result;
+                await connection.CloseAsync();
+                System.Diagnostics.Debug.WriteLine("Connection closed");
+                System.Diagnostics.Debug.WriteLine($"=== GetOrCreatePlayerAsync END: {player.Name} (ID: {player.Id}) ===");
+
+                return player;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"=== ERROR in GetOrCreatePlayerAsync ===");
+                System.Diagnostics.Debug.WriteLine($"Player name: {name}");
+                System.Diagnostics.Debug.WriteLine($"Message: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                System.Diagnostics.Debug.WriteLine($"Inner: {ex.InnerException?.Message}");
+                throw;
+            }
         }
 
         public async Task<List<Player>> GetAllPlayersAsync()

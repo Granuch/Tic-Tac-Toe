@@ -33,6 +33,8 @@ namespace Tic_Tac_Toe.ViewModels
 
         public GameViewModel()
         {
+            Debug.WriteLine("GameViewModel constructor called");
+
             _engine = new GameEngine();
             _dbService = new DatabaseService();
             _gameTimer = new Stopwatch();
@@ -44,48 +46,72 @@ namespace Tic_Tac_Toe.ViewModels
             _isGameActive = false;
             _isInitialized = false;
             _statusText = "Ініціалізація...";
+
+            Debug.WriteLine("GameViewModel constructor completed");
         }
 
         public async Task InitializeAsync(string playerXName, string playerOName, bool isPlayingWithBot, int botDifficulty)
         {
             try
             {
+                Debug.WriteLine($"=== InitializeAsync START ===");
+                Debug.WriteLine($"PlayerX: {playerXName}, PlayerO: {playerOName}");
+
                 StatusText = "Завантаження гравців...";
-                System.Diagnostics.Debug.WriteLine($"Starting initialization for {playerXName} vs {playerOName}");
 
-                System.Diagnostics.Debug.WriteLine("Getting Player X...");
-                _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName).ConfigureAwait(true);
-                System.Diagnostics.Debug.WriteLine($"Player X loaded: {_playerX?.Name} (ID: {_playerX?.Id})");
+                Debug.WriteLine("Getting Player X...");
+                _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName);
+                Debug.WriteLine($"Player X loaded: {_playerX?.Name} (ID: {_playerX?.Id})");
 
-                System.Diagnostics.Debug.WriteLine($"About to get Player O... Current status: Player X is {(_playerX != null ? "OK" : "NULL")}");
-                System.Diagnostics.Debug.WriteLine("Getting Player O...");
-                _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName).ConfigureAwait(true);
-                System.Diagnostics.Debug.WriteLine($"Player O loaded: {_playerO?.Name} (ID: {_playerO?.Id})");
+                if (_playerX == null)
+                {
+                    throw new Exception("Failed to load Player X");
+                }
 
-                System.Diagnostics.Debug.WriteLine($"Both players loaded. X={_playerX?.Name}, O={_playerO?.Name}");
+                Debug.WriteLine("Getting Player O...");
+                _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName);
+                Debug.WriteLine($"Player O loaded: {_playerO?.Name} (ID: {_playerO?.Id})");
+
+                if (_playerO == null)
+                {
+                    throw new Exception("Failed to load Player O");
+                }
+
+                Debug.WriteLine($"Both players loaded successfully");
                 _isInitialized = true;
-                System.Diagnostics.Debug.WriteLine("Starting new game...");
+
+                Debug.WriteLine("Starting new game...");
                 StartNewGame();
-                System.Diagnostics.Debug.WriteLine("Initialization complete!");
+
+                Debug.WriteLine("=== InitializeAsync COMPLETE ===");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ERROR in InitializeAsync: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                Debug.WriteLine($"=== ERROR in InitializeAsync ===");
+                Debug.WriteLine($"Message: {ex.Message}");
+                Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                Debug.WriteLine($"Inner: {ex.InnerException?.Message}");
+
                 StatusText = "Помилка ініціалізації!";
+
                 MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner: {ex.InnerException?.Message}",
                     "Помилка",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
-                throw; // Re-throw to see in App.xaml.cs
+
+                throw;
             }
         }
 
         private void StartNewGame()
         {
+            Debug.WriteLine("StartNewGame called");
+
             if (!_isInitialized || _playerX == null || _playerO == null)
             {
-                StatusText = "Помилка: гравці не ініціалізовані";
+                var error = "Помилка: гравці не ініціалізовані";
+                Debug.WriteLine(error);
+                StatusText = error;
                 return;
             }
 
@@ -94,6 +120,8 @@ namespace Tic_Tac_Toe.ViewModels
             _isGameActive = true;
             _gameTimer.Restart();
             StatusText = $"Хід гравця {_playerX.Name} (X)";
+
+            Debug.WriteLine($"Game started: {_playerX.Name} vs {_playerO.Name}");
         }
 
         private async void OnCellClicked(object? param)

@@ -1,12 +1,9 @@
 ﻿<Window x:Class="Tic_Tac_Toe.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:Tic_Tac_Toe.ViewModels"
-        Title="Tic-Tac-Toe" Width="350" Height="470">
-
-    <Window.DataContext>
-        <vm:GameViewModel />
-    </Window.DataContext>
+        Title="Tic-Tac-Toe" Width="350" Height="470"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing">
 
     <StackPanel Margin="10">
 
