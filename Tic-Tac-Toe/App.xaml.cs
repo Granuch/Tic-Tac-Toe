@@ -10,7 +10,7 @@ namespace Tic_Tac_Toe
     /// </summary>
     public partial class App : Application
     {
-        private void Application_Startup(object sender, StartupEventArgs e)
+        private async void Application_Startup(object sender, StartupEventArgs e)
         {
             try
             {
@@ -19,16 +19,29 @@ namespace Tic_Tac_Toe
                 if (selectionWindow.ShowDialog() == true)
                 {
                     var mainWindow = new MainWindow();
-                    var viewModel = mainWindow.DataContext as ViewModels.GameViewModel;
 
-                    viewModel?.Initialize(
-                        selectionWindow.PlayerXName,
-                        selectionWindow.PlayerOName,
-                        selectionWindow.IsPlayingWithBot,
-                        selectionWindow.BotDifficulty
-                    );
+                    // Важно: получаем ViewModel ПОСЛЕ создания окна
+                    if (mainWindow.DataContext is ViewModels.GameViewModel viewModel)
+                    {
+                        // Сначала показываем окно
+                        mainWindow.Show();
 
-                    mainWindow.Show();
+                        // Потом инициализируем (асинхронно)
+                        await viewModel.InitializeAsync(
+                            selectionWindow.PlayerXName,
+                            selectionWindow.PlayerOName,
+                            selectionWindow.IsPlayingWithBot,
+                            selectionWindow.BotDifficulty
+                        );
+                    }
+                    else
+                    {
+                        MessageBox.Show("Помилка ініціалізації ViewModel",
+                            "Помилка",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        Shutdown();
+                    }
                 }
                 else
                 {
@@ -37,9 +50,9 @@ namespace Tic_Tac_Toe
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка запуску додатку: {ex.Message}\n\n{ex.StackTrace}", 
-                    "Критична помилка", 
-                    MessageBoxButton.OK, 
+                MessageBox.Show($"Помилка запуску додатку: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner Exception: {ex.InnerException?.Message}",
+                    "Критична помилка",
+                    MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 Shutdown();
             }
