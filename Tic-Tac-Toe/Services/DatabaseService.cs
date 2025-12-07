@@ -177,7 +177,6 @@ namespace Tic_Tac_Toe.Services
             try
             {
                 using var context = CreateContext();
-                // Здесь ConfigureAwait(false) можно оставить, т.к. результат не используется в UI потоке напрямую
                 return await context.Players.ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)

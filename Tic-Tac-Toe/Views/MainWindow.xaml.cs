@@ -34,8 +34,6 @@ namespace Tic_Tac_Toe
             System.Diagnostics.Debug.WriteLine("=== MainWindow.Window_Closing called ===");
             System.Diagnostics.Debug.WriteLine($"IsInitialized: {IsInitialized}");
 
-            // Больше не блокируем закрытие, так как ShutdownMode=OnExplicitShutdown
-            // защищает нас до завершения инициализации
         }
 
         protected override void OnContentRendered(EventArgs e)

@@ -10,7 +10,6 @@ namespace Tic_Tac_Toe
     {
         private async void Application_Startup(object sender, StartupEventArgs e)
         {
-            // ВАЖНО: Используем OnExplicitShutdown чтобы окно не могло закрыться случайно
             this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             try
@@ -42,7 +41,6 @@ namespace Tic_Tac_Toe
                     mainWindow.Show();
                     System.Diagnostics.Debug.WriteLine("MainWindow shown");
 
-                    // КРИТИЧЕСКИ ВАЖНО: await вместо fire-and-forget
                     System.Diagnostics.Debug.WriteLine("=== Starting initialization ===");
 
                     try
@@ -54,10 +52,8 @@ namespace Tic_Tac_Toe
                             selectionWindow.BotDifficulty
                         );
 
-                        // Разрешаем закрытие окна после инициализации
                         mainWindow.IsInitialized = true;
 
-                        // Теперь можно вернуть нормальный режим shutdown
                         this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
                         System.Diagnostics.Debug.WriteLine("=== Initialization completed successfully! ===");
@@ -75,7 +71,6 @@ namespace Tic_Tac_Toe
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
 
-                        // При ошибке возвращаем нормальный режим и закрываем
                         this.ShutdownMode = ShutdownMode.OnMainWindowClose;
                         mainWindow.Close();
                         Shutdown();

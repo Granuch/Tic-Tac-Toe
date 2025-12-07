@@ -60,7 +60,6 @@ namespace Tic_Tac_Toe.ViewModels
                 StatusText = "Завантаження гравців...";
 
                 Debug.WriteLine("Getting Player X...");
-                // УБРАЛИ ConfigureAwait(false) - остаемся в UI потоке!
                 _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName);
                 Debug.WriteLine($"Player X loaded: {_playerX?.Name} (ID: {_playerX?.Id})");
 
@@ -70,7 +69,6 @@ namespace Tic_Tac_Toe.ViewModels
                 }
 
                 Debug.WriteLine("Getting Player O...");
-                // УБРАЛИ ConfigureAwait(false) - остаемся в UI потоке!
                 _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName);
                 Debug.WriteLine($"Player O loaded: {_playerO?.Name} (ID: {_playerO?.Id})");
 
@@ -86,7 +84,6 @@ namespace Tic_Tac_Toe.ViewModels
                 Debug.WriteLine($"Current thread: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
                 Debug.WriteLine($"Is UI thread: {Application.Current.Dispatcher.CheckAccess()}");
 
-                // Теперь мы УЖЕ в UI потоке, можно вызывать напрямую
                 Debug.WriteLine("Calling StartNewGame directly...");
                 StartNewGame();
                 Debug.WriteLine("=== StartNewGame completed ===");
