@@ -14,11 +14,14 @@ namespace Tic_Tac_Toe.ViewModels
         private readonly GameEngine _engine;
         private readonly DatabaseService _dbService;
         private readonly Stopwatch _gameTimer;
+        private BotPlayerService? _bot;
 
         private Player? _playerX;
         private Player? _playerO;
         private bool _isGameActive;
         private bool _isInitialized;
+        private bool _isPlayingWithBot;
+        private bool _isBotThinking;
 
         public ObservableCollection<string> Board { get; set; }
         public ICommand CellClickCommand { get; }
@@ -40,14 +43,20 @@ namespace Tic_Tac_Toe.ViewModels
             _gameTimer = new Stopwatch();
 
             Board = new ObservableCollection<string>(new string[9]);
-            CellClickCommand = new RelayCommand(OnCellClicked);
+            CellClickCommand = new RelayCommand(OnCellClicked, CanMakeMove);
             RestartCommand = new RelayCommand(_ => Restart());
 
             _isGameActive = false;
             _isInitialized = false;
+            _isBotThinking = false;
             _statusText = "Ініціалізація...";
 
             Debug.WriteLine("GameViewModel constructor completed");
+        }
+
+        private bool CanMakeMove(object? param)
+        {
+            return _isGameActive && !_isBotThinking;
         }
 
         public async Task InitializeAsync(string playerXName, string playerOName, bool isPlayingWithBot, int botDifficulty)
@@ -55,9 +64,11 @@ namespace Tic_Tac_Toe.ViewModels
             try
             {
                 Debug.WriteLine($"=== InitializeAsync START ===");
-                Debug.WriteLine($"PlayerX: {playerXName}, PlayerO: {playerOName}");
+                Debug.WriteLine($"PlayerX: {playerXName}, PlayerO: {playerOName}, Bot: {isPlayingWithBot}, Difficulty: {botDifficulty}");
 
                 StatusText = "Завантаження гравців...";
+
+                _isPlayingWithBot = isPlayingWithBot;
 
                 Debug.WriteLine("Getting Player X...");
                 _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName);
@@ -77,17 +88,18 @@ namespace Tic_Tac_Toe.ViewModels
                     throw new Exception("Failed to load Player O");
                 }
 
+                // Ініціалізація бота, якщо потрібно
+                if (_isPlayingWithBot)
+                {
+                    _bot = new BotPlayerService((BotDifficulty)botDifficulty);
+                    Debug.WriteLine($"Bot initialized with difficulty: {(BotDifficulty)botDifficulty}");
+                }
+
                 Debug.WriteLine($"Both players loaded successfully");
                 _isInitialized = true;
 
                 Debug.WriteLine("Starting new game...");
-                Debug.WriteLine($"Current thread: {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-                Debug.WriteLine($"Is UI thread: {Application.Current.Dispatcher.CheckAccess()}");
-
-                Debug.WriteLine("Calling StartNewGame directly...");
                 StartNewGame();
-                Debug.WriteLine("=== StartNewGame completed ===");
-
                 Debug.WriteLine("=== InitializeAsync COMPLETE ===");
             }
             catch (Exception ex)
@@ -111,9 +123,6 @@ namespace Tic_Tac_Toe.ViewModels
         private void StartNewGame()
         {
             Debug.WriteLine("=== StartNewGame called ===");
-            Debug.WriteLine($"_isInitialized: {_isInitialized}");
-            Debug.WriteLine($"_playerX: {_playerX?.Name ?? "null"}");
-            Debug.WriteLine($"_playerO: {_playerO?.Name ?? "null"}");
 
             if (!_isInitialized || _playerX == null || _playerO == null)
             {
@@ -123,32 +132,21 @@ namespace Tic_Tac_Toe.ViewModels
                 return;
             }
 
-            Debug.WriteLine("Resetting board...");
             _engine.ResetBoard();
-
-            Debug.WriteLine("Updating board UI...");
             UpdateBoard();
-
-            Debug.WriteLine("Setting game active...");
             _isGameActive = true;
-
-            Debug.WriteLine("Starting timer...");
+            _isBotThinking = false;
             _gameTimer.Restart();
 
-            Debug.WriteLine($"Setting status text to: Хід гравця {_playerX.Name} (X)");
             StatusText = $"Хід гравця {_playerX.Name} (X)";
 
             Debug.WriteLine($"=== Game started: {_playerX.Name} vs {_playerO.Name} ===");
-            Debug.WriteLine($"Board count: {Board.Count}");
-            for (int i = 0; i < Board.Count; i++)
-            {
-                Debug.WriteLine($"Board[{i}] = '{Board[i]}'");
-            }
         }
 
         private async void OnCellClicked(object? param)
         {
-            if (!_isGameActive || param == null) return;
+            if (!_isGameActive || _isBotThinking || param == null)
+                return;
 
             if (!int.TryParse(param.ToString(), out int index))
                 return;
@@ -158,6 +156,53 @@ namespace Tic_Tac_Toe.ViewModels
 
             UpdateBoard();
 
+            if (await CheckGameEnd())
+                return;
+
+            _engine.SwitchPlayer();
+
+            // Якщо зараз хід бота
+            if (_isPlayingWithBot && _engine.CurrentPlayer == 'O')
+            {
+                await MakeBotMove();
+            }
+            else
+            {
+                var currentPlayerName = _engine.CurrentPlayer == 'X' ? _playerX?.Name : _playerO?.Name;
+                StatusText = $"Хід гравця {currentPlayerName} ({_engine.CurrentPlayer})";
+            }
+        }
+
+        private async Task MakeBotMove()
+        {
+            if (_bot == null) return;
+
+            _isBotThinking = true;
+            StatusText = "Бот думає...";
+
+//          await Task.Run(async () => await Task.Delay(500));
+
+            int botMove = _bot.GetNextMove(_engine.Board, 'O');
+
+            if (botMove != -1 && _engine.MakeMove(botMove))
+            {
+                UpdateBoard();
+
+                if (await CheckGameEnd())
+                {
+                    _isBotThinking = false;
+                    return;
+                }
+
+                _engine.SwitchPlayer();
+                StatusText = $"Хід гравця {_playerX?.Name} (X)";
+            }
+
+            _isBotThinking = false;
+        }
+
+        private async Task<bool> CheckGameEnd()
+        {
             if (_engine.CheckWinner())
             {
                 _gameTimer.Stop();
@@ -170,7 +215,7 @@ namespace Tic_Tac_Toe.ViewModels
                 {
                     await SaveGameResult(winner.Id.ToString());
                 }
-                return;
+                return true;
             }
 
             if (_engine.CheckDraw())
@@ -180,21 +225,17 @@ namespace Tic_Tac_Toe.ViewModels
                 StatusText = "Нічия!";
 
                 await SaveGameResult("Draw");
-                return;
+                return true;
             }
 
-            _engine.SwitchPlayer();
-            var currentPlayerName = _engine.CurrentPlayer == 'X' ? _playerX?.Name : _playerO?.Name;
-            StatusText = $"Хід гравця {currentPlayerName} ({_engine.CurrentPlayer})";
+            return false;
         }
 
         private void UpdateBoard()
         {
-            Debug.WriteLine("=== UpdateBoard called ===");
             for (int i = 0; i < 9; i++)
             {
                 Board[i] = _engine.Board[i] == '\0' ? "" : _engine.Board[i].ToString();
-                Debug.WriteLine($"Updated Board[{i}] = '{Board[i]}'");
             }
         }
 

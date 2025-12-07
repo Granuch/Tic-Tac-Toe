@@ -10,6 +10,7 @@ namespace Tic_Tac_Toe
     {
         private async void Application_Startup(object sender, StartupEventArgs e)
         {
+            // Дозволяємо закривати вікна без виходу з програми
             this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             try
@@ -54,7 +55,9 @@ namespace Tic_Tac_Toe
 
                         mainWindow.IsInitialized = true;
 
-                        this.ShutdownMode = ShutdownMode.OnMainWindowClose;
+                        // Тепер можна закрити програму при закритті головного вікна
+                        // Але тільки якщо це не перехід в меню
+                        this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
                         System.Diagnostics.Debug.WriteLine("=== Initialization completed successfully! ===");
                     }
@@ -71,7 +74,6 @@ namespace Tic_Tac_Toe
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
 
-                        this.ShutdownMode = ShutdownMode.OnMainWindowClose;
                         mainWindow.Close();
                         Shutdown();
                     }
