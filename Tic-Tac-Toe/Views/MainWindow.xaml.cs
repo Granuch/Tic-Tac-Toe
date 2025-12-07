@@ -40,52 +40,12 @@ namespace Tic_Tac_Toe
 
             if (result == MessageBoxResult.Yes)
             {
-                // Відкриваємо вікно вибору гравців
-                var selectionWindow = new PlayerSelectionWindow();
-                var dialogResult = selectionWindow.ShowDialog();
+                _isReturningToMenu = true;
 
-                if (dialogResult == true)
-                {
-                    // Створюємо нову гру
-                    var viewModel = new GameViewModel();
-                    var mainWindow = new MainWindow
-                    {
-                        DataContext = viewModel
-                    };
+                this.Close();
 
-                    try
-                    {
-                        // Ініціалізуємо ViewModel
-                        await viewModel.InitializeAsync(
-                            selectionWindow.PlayerXName,
-                            selectionWindow.PlayerOName,
-                            selectionWindow.IsPlayingWithBot,
-                            selectionWindow.BotDifficulty
-                        );
-
-                        mainWindow.IsInitialized = true;
-
-                        // Встановлюємо нове головне вікно
-                        Application.Current.MainWindow = mainWindow;
-
-                        // Показуємо нове вікно
-                        mainWindow.Show();
-
-                        // ТЕПЕР закриваємо старе вікно
-                        _isReturningToMenu = true; // Встановлюємо флаг ПЕРЕД закриттям
-                        this.Close(); // Закриваємо поточне вікно
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            $"Помилка ініціалізації: {ex.Message}",
-                            "Помилка",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-
-                        mainWindow.Close();
-                    }
-                }
+                var app = (App)Application.Current;
+                await app.ShowPlayerSelectionAndStartGame();
             }
         }
 
@@ -95,14 +55,12 @@ namespace Tic_Tac_Toe
             System.Diagnostics.Debug.WriteLine($"IsInitialized: {IsInitialized}");
             System.Diagnostics.Debug.WriteLine($"IsReturningToMenu: {_isReturningToMenu}");
 
-            // Якщо переходимо в меню - дозволяємо закрити вікно без завершення програми
             if (_isReturningToMenu)
             {
                 System.Diagnostics.Debug.WriteLine("Closing window during menu transition - allowed");
-                return; // Просто закриваємо вікно
+                return;
             }
 
-            // Якщо це звичайне закриття (натиснули X) - завершуємо програму
             System.Diagnostics.Debug.WriteLine("Normal window closing - shutting down application");
             Application.Current.Shutdown();
         }

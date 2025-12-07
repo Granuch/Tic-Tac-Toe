@@ -10,79 +10,13 @@ namespace Tic_Tac_Toe
     {
         private async void Application_Startup(object sender, StartupEventArgs e)
         {
-            // Дозволяємо закривати вікна без виходу з програми
             this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             try
             {
                 System.Diagnostics.Debug.WriteLine("Application starting...");
 
-                var selectionWindow = new PlayerSelectionWindow();
-                System.Diagnostics.Debug.WriteLine("PlayerSelectionWindow created");
-
-                var dialogResult = selectionWindow.ShowDialog();
-                System.Diagnostics.Debug.WriteLine($"PlayerSelectionWindow closed with result: {dialogResult}");
-
-                if (dialogResult == true)
-                {
-                    System.Diagnostics.Debug.WriteLine("Creating GameViewModel...");
-                    var viewModel = new GameViewModel();
-                    System.Diagnostics.Debug.WriteLine("GameViewModel created");
-
-                    System.Diagnostics.Debug.WriteLine("Creating MainWindow...");
-                    var mainWindow = new MainWindow
-                    {
-                        DataContext = viewModel
-                    };
-                    System.Diagnostics.Debug.WriteLine("MainWindow created");
-
-                    this.MainWindow = mainWindow;
-                    System.Diagnostics.Debug.WriteLine("MainWindow set as Application.MainWindow");
-
-                    mainWindow.Show();
-                    System.Diagnostics.Debug.WriteLine("MainWindow shown");
-
-                    System.Diagnostics.Debug.WriteLine("=== Starting initialization ===");
-
-                    try
-                    {
-                        await viewModel.InitializeAsync(
-                            selectionWindow.PlayerXName,
-                            selectionWindow.PlayerOName,
-                            selectionWindow.IsPlayingWithBot,
-                            selectionWindow.BotDifficulty
-                        );
-
-                        mainWindow.IsInitialized = true;
-
-                        // Тепер можна закрити програму при закритті головного вікна
-                        // Але тільки якщо це не перехід в меню
-                        this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-
-                        System.Diagnostics.Debug.WriteLine("=== Initialization completed successfully! ===");
-                    }
-                    catch (Exception initEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"=== ERROR during initialization ===");
-                        System.Diagnostics.Debug.WriteLine($"Message: {initEx.Message}");
-                        System.Diagnostics.Debug.WriteLine($"StackTrace: {initEx.StackTrace}");
-                        System.Diagnostics.Debug.WriteLine($"Inner: {initEx.InnerException?.Message}");
-
-                        MessageBox.Show(
-                            $"Помилка ініціалізації: {initEx.Message}\n\n{initEx.StackTrace}",
-                            "Помилка",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-
-                        mainWindow.Close();
-                        Shutdown();
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("User cancelled selection, shutting down");
-                    Shutdown();
-                }
+                await ShowPlayerSelectionAndStartGame();
             }
             catch (Exception ex)
             {
@@ -97,6 +31,71 @@ namespace Tic_Tac_Toe
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
 
+                Shutdown();
+            }
+        }
+
+        public async Task ShowPlayerSelectionAndStartGame()
+        {
+            var selectionWindow = new PlayerSelectionWindow();
+            System.Diagnostics.Debug.WriteLine("PlayerSelectionWindow created");
+
+            var dialogResult = selectionWindow.ShowDialog();
+            System.Diagnostics.Debug.WriteLine($"PlayerSelectionWindow closed with result: {dialogResult}");
+
+            if (dialogResult == true)
+            {
+                System.Diagnostics.Debug.WriteLine("Creating GameViewModel...");
+                var viewModel = new GameViewModel();
+                System.Diagnostics.Debug.WriteLine("GameViewModel created");
+
+                System.Diagnostics.Debug.WriteLine("Creating MainWindow...");
+                var mainWindow = new MainWindow
+                {
+                    DataContext = viewModel
+                };
+                System.Diagnostics.Debug.WriteLine("MainWindow created");
+
+                this.MainWindow = mainWindow;
+                System.Diagnostics.Debug.WriteLine("MainWindow set as Application.MainWindow");
+
+                mainWindow.Show();
+                System.Diagnostics.Debug.WriteLine("MainWindow shown");
+
+                System.Diagnostics.Debug.WriteLine("=== Starting initialization ===");
+
+                try
+                {
+                    await viewModel.InitializeAsync(
+                        selectionWindow.PlayerXName,
+                        selectionWindow.PlayerOName,
+                        selectionWindow.IsPlayingWithBot,
+                        selectionWindow.BotDifficulty
+                    );
+
+                    mainWindow.IsInitialized = true;
+                    System.Diagnostics.Debug.WriteLine("=== Initialization completed successfully! ===");
+                }
+                catch (Exception initEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"=== ERROR during initialization ===");
+                    System.Diagnostics.Debug.WriteLine($"Message: {initEx.Message}");
+                    System.Diagnostics.Debug.WriteLine($"StackTrace: {initEx.StackTrace}");
+                    System.Diagnostics.Debug.WriteLine($"Inner: {initEx.InnerException?.Message}");
+
+                    MessageBox.Show(
+                        $"Помилка ініціалізації: {initEx.Message}\n\n{initEx.StackTrace}",
+                        "Помилка",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+
+                    mainWindow.Close();
+                    Shutdown();
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("User cancelled selection, shutting down");
                 Shutdown();
             }
         }

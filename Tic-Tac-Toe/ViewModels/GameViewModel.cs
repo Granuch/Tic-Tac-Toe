@@ -88,7 +88,6 @@ namespace Tic_Tac_Toe.ViewModels
                     throw new Exception("Failed to load Player O");
                 }
 
-                // Ініціалізація бота, якщо потрібно
                 if (_isPlayingWithBot)
                 {
                     _bot = new BotPlayerService((BotDifficulty)botDifficulty);
@@ -161,7 +160,6 @@ namespace Tic_Tac_Toe.ViewModels
 
             _engine.SwitchPlayer();
 
-            // Якщо зараз хід бота
             if (_isPlayingWithBot && _engine.CurrentPlayer == 'O')
             {
                 await MakeBotMove();
