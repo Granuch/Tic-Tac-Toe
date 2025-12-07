@@ -93,7 +93,6 @@ namespace Tic_Tac_Toe.Services
                 await connection.OpenAsync();
                 System.Diagnostics.Debug.WriteLine($"Connection opened successfully. State: {connection.State}");
 
-                // Поиск игрока
                 using var selectCmd = new Microsoft.Data.SqlClient.SqlCommand(
                     "SELECT Id, Name FROM Players WHERE Name = @name",
                     connection);

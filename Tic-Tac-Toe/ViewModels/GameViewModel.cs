@@ -162,7 +162,7 @@ namespace Tic_Tac_Toe.ViewModels
 
             if (_isPlayingWithBot && _engine.CurrentPlayer == 'O')
             {
-                await MakeBotMove();
+                MakeBotMove();
             }
             else
             {
@@ -171,32 +171,74 @@ namespace Tic_Tac_Toe.ViewModels
             }
         }
 
-        private async Task MakeBotMove()
+        private void MakeBotMove()
         {
             if (_bot == null) return;
 
             _isBotThinking = true;
             StatusText = "Бот думає...";
 
-//          await Task.Run(async () => await Task.Delay(500));
-
-            int botMove = _bot.GetNextMove(_engine.Board, 'O');
-
-            if (botMove != -1 && _engine.MakeMove(botMove))
+            var timer = new System.Windows.Threading.DispatcherTimer
             {
-                UpdateBoard();
+                Interval = TimeSpan.FromMilliseconds(Random.Shared.Next(500, 1000))
+            };
 
-                if (await CheckGameEnd())
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+
+                int botMove = _bot.GetNextMove(_engine.Board, 'O');
+
+                if (botMove != -1 && _engine.MakeMove(botMove))
                 {
-                    _isBotThinking = false;
-                    return;
+                    UpdateBoard();
+
+                    if (CheckGameEndSync())
+                    {
+                        _isBotThinking = false;
+                        return;
+                    }
+
+                    _engine.SwitchPlayer();
+                    StatusText = $"Хід гравця {_playerX?.Name} (X)";
                 }
 
-                _engine.SwitchPlayer();
-                StatusText = $"Хід гравця {_playerX?.Name} (X)";
+                _isBotThinking = false;
+
+                CommandManager.InvalidateRequerySuggested();
+            };
+
+            timer.Start();
+        }
+
+        private bool CheckGameEndSync()
+        {
+            if (_engine.CheckWinner())
+            {
+                _gameTimer.Stop();
+                _isGameActive = false;
+
+                var winner = _engine.CurrentPlayer == 'X' ? _playerX : _playerO;
+                StatusText = $"{winner?.Name} переміг!";
+
+                if (winner != null)
+                {
+                    _ = SaveGameResult(winner.Id.ToString());
+                }
+                return true;
             }
 
-            _isBotThinking = false;
+            if (_engine.CheckDraw())
+            {
+                _gameTimer.Stop();
+                _isGameActive = false;
+                StatusText = "Нічия!";
+
+                _ = SaveGameResult("Draw");
+                return true;
+            }
+
+            return false;
         }
 
         private async Task<bool> CheckGameEnd()
