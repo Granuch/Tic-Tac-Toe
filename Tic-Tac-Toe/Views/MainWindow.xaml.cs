@@ -7,7 +7,6 @@ namespace Tic_Tac_Toe.Views
 {
     public partial class MainWindow : Window
     {
-        public bool IsInitialized { get; set; } = false;
         private bool _isReturningToMenu = false;
         private readonly IPlayerService _playerService;
         private readonly IGameResultService _gameResultService;
@@ -24,7 +23,6 @@ namespace Tic_Tac_Toe.Views
 
         private void Statistics_Click(object sender, RoutedEventArgs e)
         {
-            // Create statistics window with DI
             var statsWindow = new StatisticsWindow(_playerService, _gameResultService);
             statsWindow.ShowDialog();
         }
@@ -50,7 +48,6 @@ namespace Tic_Tac_Toe.Views
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("=== MainWindow.Window_Closing called ===");
-            System.Diagnostics.Debug.WriteLine($"IsInitialized: {IsInitialized}");
             System.Diagnostics.Debug.WriteLine($"IsReturningToMenu: {_isReturningToMenu}");
 
             if (_isReturningToMenu)

@@ -14,6 +14,7 @@ namespace Tic_Tac_Toe
     public partial class App : Application
     {
         private readonly IHost _host;
+        private IServiceScope? _currentGameScope; // Зберігаємо scope
 
         public App()
         {
@@ -92,10 +93,7 @@ namespace Tic_Tac_Toe
             try
             {
                 System.Diagnostics.Debug.WriteLine("Checking database connection...");
-
-                // This will create the database if it doesn't exist
                 await context.Database.EnsureCreatedAsync();
-
                 System.Diagnostics.Debug.WriteLine("Database ready");
             }
             catch (Exception ex)
@@ -107,6 +105,10 @@ namespace Tic_Tac_Toe
 
         public async Task ShowPlayerSelectionAndStartGame()
         {
+            // Закриваємо попередній scope якщо він є
+            _currentGameScope?.Dispose();
+            _currentGameScope = null;
+
             using var scope = _host.Services.CreateScope();
             var selectionWindow = scope.ServiceProvider.GetRequiredService<PlayerSelectionWindow>();
 
@@ -119,12 +121,22 @@ namespace Tic_Tac_Toe
             {
                 System.Diagnostics.Debug.WriteLine("Creating MainWindow...");
 
-                using var gameScope = _host.Services.CreateScope();
-                var viewModel = gameScope.ServiceProvider.GetRequiredService<GameViewModel>();
-                var mainWindow = gameScope.ServiceProvider.GetRequiredService<MainWindow>();
+                // Створюємо НОВИЙ scope який буде жити поки вікно відкрите
+                _currentGameScope = _host.Services.CreateScope();
+
+                var viewModel = _currentGameScope.ServiceProvider.GetRequiredService<GameViewModel>();
+                var mainWindow = _currentGameScope.ServiceProvider.GetRequiredService<MainWindow>();
 
                 mainWindow.DataContext = viewModel;
                 this.MainWindow = mainWindow;
+
+                // Підписуємось на закриття вікна щоб dispose-нути scope
+                mainWindow.Closed += (s, e) =>
+                {
+                    System.Diagnostics.Debug.WriteLine("MainWindow closed, disposing scope");
+                    _currentGameScope?.Dispose();
+                    _currentGameScope = null;
+                };
 
                 mainWindow.Show();
                 System.Diagnostics.Debug.WriteLine("MainWindow shown");
@@ -140,7 +152,6 @@ namespace Tic_Tac_Toe
                         selectionWindow.BotDifficulty
                     );
 
-                    //mainWindow.IsInitialized = true;
                     System.Diagnostics.Debug.WriteLine("=== Initialization completed successfully! ===");
                 }
                 catch (Exception initEx)
@@ -155,6 +166,9 @@ namespace Tic_Tac_Toe
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
 
+                    _currentGameScope?.Dispose();
+                    _currentGameScope = null;
+
                     mainWindow.Close();
                     Shutdown();
                 }
@@ -168,6 +182,9 @@ namespace Tic_Tac_Toe
 
         protected override async void OnExit(ExitEventArgs e)
         {
+            // Dispose scope при виході
+            _currentGameScope?.Dispose();
+
             using (_host)
             {
                 await _host.StopAsync();
