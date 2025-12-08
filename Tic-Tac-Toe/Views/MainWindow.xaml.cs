@@ -1,32 +1,31 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Tic_Tac_Toe.ViewModels;
-using Tic_Tac_Toe.Views;
+using Tic_Tac_Toe.Services;
+using Tic_Tac_Toe.Services.Interfaces;
 
-namespace Tic_Tac_Toe
+namespace Tic_Tac_Toe.Views
 {
     public partial class MainWindow : Window
     {
         public bool IsInitialized { get; set; } = false;
         private bool _isReturningToMenu = false;
+        private readonly IPlayerService _playerService;
+        private readonly IGameResultService _gameResultService;
 
-        public MainWindow()
+        public MainWindow(IPlayerService playerService, IGameResultService gameResultService)
         {
             InitializeComponent();
+
+            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+            _gameResultService = gameResultService ?? throw new ArgumentNullException(nameof(gameResultService));
+
             System.Diagnostics.Debug.WriteLine("MainWindow constructor called");
         }
 
         private void Statistics_Click(object sender, RoutedEventArgs e)
         {
-            var statsWindow = new StatisticsWindow();
+            // Create statistics window with DI
+            var statsWindow = new StatisticsWindow(_playerService, _gameResultService);
             statsWindow.ShowDialog();
         }
 
@@ -41,7 +40,6 @@ namespace Tic_Tac_Toe
             if (result == MessageBoxResult.Yes)
             {
                 _isReturningToMenu = true;
-
                 this.Close();
 
                 var app = (App)Application.Current;

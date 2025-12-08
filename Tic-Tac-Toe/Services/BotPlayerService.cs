@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Tic_Tac_Toe.Services.Interfaces;
 
 namespace Tic_Tac_Toe.Services
 {
@@ -11,7 +12,7 @@ namespace Tic_Tac_Toe.Services
         Hard = 2
     }
 
-    public class BotPlayerService
+    public class BotPlayerService : IBotPlayerService
     {
         private readonly BotDifficulty _difficulty;
         private readonly Random _random;
@@ -158,14 +159,9 @@ namespace Tic_Tac_Toe.Services
         {
             int[,] winPatterns = new int[,]
             {
-                {0, 1, 2},
-                {3, 4, 5},
-                {6, 7, 8},
-                {0, 3, 6},
-                {1, 4, 7},
-                {2, 5, 8},
-                {0, 4, 8},
-                {2, 4, 6}
+                {0, 1, 2}, {3, 4, 5}, {6, 7, 8},
+                {0, 3, 6}, {1, 4, 7}, {2, 5, 8},
+                {0, 4, 8}, {2, 4, 6}
             };
 
             for (int i = 0; i < 8; i++)

@@ -1,18 +1,24 @@
-﻿using System.Windows;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 using System.Windows.Controls;
 using Tic_Tac_Toe.Models;
 using Tic_Tac_Toe.Services;
+using Tic_Tac_Toe.Services.Interfaces;
 
 namespace Tic_Tac_Toe.Views
 {
     public partial class StatisticsWindow : Window
     {
-        private readonly DatabaseService _dbService;
+        private readonly IPlayerService _playerService;
+        private readonly IGameResultService _gameResultService;
 
-        public StatisticsWindow()
+        public StatisticsWindow(IPlayerService playerService, IGameResultService gameResultService)
         {
             InitializeComponent();
-            _dbService = new DatabaseService();
+
+            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+            _gameResultService = gameResultService ?? throw new ArgumentNullException(nameof(gameResultService));
+
             LoadPlayers();
         }
 
@@ -20,7 +26,7 @@ namespace Tic_Tac_Toe.Views
         {
             try
             {
-                var players = await _dbService.GetAllPlayersAsync();
+                var players = await _playerService.GetAllPlayersAsync();
                 CmbPlayers.ItemsSource = players;
             }
             catch (Exception ex)
@@ -36,19 +42,18 @@ namespace Tic_Tac_Toe.Views
             {
                 try
                 {
-                    var stats = await _dbService.GetPlayerStatsAsync(player.Id);
-                    var history = await _dbService.GetGameHistoryAsync(player.Id);
+                    var stats = await _gameResultService.GetPlayerStatisticsAsync(player.Id);
+                    var history = await _gameResultService.GetRecentGamesAsync(player.Id, 10);
 
                     TxtStats.Text = $"Статистика гравця: {player.Name}\n\n" +
-                                   $"Всього ігор: {stats["TotalGames"]}\n" +
-                                   $"Перемог: {stats["Wins"]}\n" +
-                                   $"Нічиїх: {stats["Draws"]}\n" +
-                                   $"Поразок: {stats["Losses"]}\n\n";
+                                   $"Всього ігор: {stats.TotalGames}\n" +
+                                   $"Перемог: {stats.Wins}\n" +
+                                   $"Нічиїх: {stats.Draws}\n" +
+                                   $"Поразок: {stats.Losses}\n\n";
 
-                    if (stats["TotalGames"] > 0)
+                    if (stats.TotalGames > 0)
                     {
-                        double winRate = (double)stats["Wins"] / stats["TotalGames"] * 100;
-                        TxtStats.Text += $"Відсоток перемог: {winRate:F1}%";
+                        TxtStats.Text += $"Відсоток перемог: {stats.WinRate:F1}%";
                     }
 
                     if (history.Any())
@@ -57,7 +62,7 @@ namespace Tic_Tac_Toe.Views
                                          "Історія останніх 10 ігор:\n" +
                                          "━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
 
-                        foreach (var game in history.Take(10))
+                        foreach (var game in history)
                         {
                             string result = game.Winner == player.Id.ToString()
                                 ? "✓ Перемога"

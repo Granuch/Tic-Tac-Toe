@@ -1,20 +1,20 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using Tic_Tac_Toe.Models;
 using Tic_Tac_Toe.Services;
+using Tic_Tac_Toe.Services.Interfaces;
 
 namespace Tic_Tac_Toe.ViewModels
 {
     public class GameViewModel : ObjectObserver
     {
-        private readonly GameEngine _engine;
-        private readonly DatabaseService _dbService;
+        private readonly IGameEngine _engine;
+        private readonly IPlayerService _playerService;
+        private readonly IGameResultService _gameResultService;
         private readonly Stopwatch _gameTimer;
-        private BotPlayerService? _bot;
+        private IBotPlayerService? _bot;
 
         private Player? _playerX;
         private Player? _playerO;
@@ -34,12 +34,16 @@ namespace Tic_Tac_Toe.ViewModels
             set { _statusText = value; OnPropertyChanged(); }
         }
 
-        public GameViewModel()
+        public GameViewModel(
+            IGameEngine gameEngine,
+            IPlayerService playerService,
+            IGameResultService gameResultService)
         {
             Debug.WriteLine("GameViewModel constructor called");
 
-            _engine = new GameEngine();
-            _dbService = new DatabaseService();
+            _engine = gameEngine ?? throw new ArgumentNullException(nameof(gameEngine));
+            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+            _gameResultService = gameResultService ?? throw new ArgumentNullException(nameof(gameResultService));
             _gameTimer = new Stopwatch();
 
             Board = new ObservableCollection<string>(new string[9]);
@@ -71,7 +75,7 @@ namespace Tic_Tac_Toe.ViewModels
                 _isPlayingWithBot = isPlayingWithBot;
 
                 Debug.WriteLine("Getting Player X...");
-                _playerX = await _dbService.GetOrCreatePlayerAsync(playerXName);
+                _playerX = await _playerService.GetOrCreatePlayerAsync(playerXName);
                 Debug.WriteLine($"Player X loaded: {_playerX?.Name} (ID: {_playerX?.Id})");
 
                 if (_playerX == null)
@@ -80,7 +84,7 @@ namespace Tic_Tac_Toe.ViewModels
                 }
 
                 Debug.WriteLine("Getting Player O...");
-                _playerO = await _dbService.GetOrCreatePlayerAsync(playerOName);
+                _playerO = await _playerService.GetOrCreatePlayerAsync(playerOName);
                 Debug.WriteLine($"Player O loaded: {_playerO?.Name} (ID: {_playerO?.Id})");
 
                 if (_playerO == null)
@@ -106,11 +110,10 @@ namespace Tic_Tac_Toe.ViewModels
                 Debug.WriteLine($"=== ERROR in InitializeAsync ===");
                 Debug.WriteLine($"Message: {ex.Message}");
                 Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-                Debug.WriteLine($"Inner: {ex.InnerException?.Message}");
 
                 StatusText = "Помилка ініціалізації!";
 
-                MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}\n\nStackTrace:\n{ex.StackTrace}\n\nInner: {ex.InnerException?.Message}",
+                MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}",
                     "Помилка",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
@@ -204,7 +207,6 @@ namespace Tic_Tac_Toe.ViewModels
                 }
 
                 _isBotThinking = false;
-
                 CommandManager.InvalidateRequerySuggested();
             };
 
@@ -286,12 +288,12 @@ namespace Tic_Tac_Toe.ViewModels
                 if (_playerX == null || _playerO == null)
                     return;
 
-                await _dbService.SaveGameResultAsync(
+                await _gameResultService.SaveGameResultAsync(
                     _playerX.Id,
                     _playerO.Id,
                     winner,
                     _gameTimer.Elapsed
-                ).ConfigureAwait(false);
+                );
             }
             catch (Exception ex)
             {
