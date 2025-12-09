@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using Tic_Tac_Toe.Services;
 using Tic_Tac_Toe.Services.Interfaces;
 
 namespace Tic_Tac_Toe.Views
@@ -8,22 +7,19 @@ namespace Tic_Tac_Toe.Views
     public partial class MainWindow : Window
     {
         private bool _isReturningToMenu = false;
-        private readonly IPlayerService _playerService;
-        private readonly IGameResultService _gameResultService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public MainWindow(IPlayerService playerService, IGameResultService gameResultService)
+        public MainWindow(IServiceProvider serviceProvider)
         {
             InitializeComponent();
-
-            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
-            _gameResultService = gameResultService ?? throw new ArgumentNullException(nameof(gameResultService));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
             System.Diagnostics.Debug.WriteLine("MainWindow constructor called");
         }
 
         private void Statistics_Click(object sender, RoutedEventArgs e)
         {
-            var statsWindow = new StatisticsWindow(_playerService, _gameResultService);
+            var statsWindow = _serviceProvider.GetRequiredService<StatisticsWindow>();
             statsWindow.ShowDialog();
         }
 
@@ -58,18 +54,6 @@ namespace Tic_Tac_Toe.Views
 
             System.Diagnostics.Debug.WriteLine("Normal window closing - shutting down application");
             Application.Current.Shutdown();
-        }
-
-        protected override void OnContentRendered(EventArgs e)
-        {
-            base.OnContentRendered(e);
-            System.Diagnostics.Debug.WriteLine("=== MainWindow.OnContentRendered ===");
-        }
-
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-            System.Diagnostics.Debug.WriteLine("=== MainWindow.OnActivated ===");
         }
     }
 }

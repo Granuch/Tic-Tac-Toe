@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Tic_Tac_Toe.Constants;
 using Tic_Tac_Toe.Services.Interfaces;
 
 namespace Tic_Tac_Toe.Services
@@ -12,19 +10,19 @@ namespace Tic_Tac_Toe.Services
 
         public GameEngineService()
         {
-            Board = new char[9];
+            Board = new char[GameConstants.BoardSize];
             ResetBoard();
         }
 
         public void ResetBoard()
         {
-            Board = new char[9];
-            CurrentPlayer = 'X';
+            Board = new char[GameConstants.BoardSize];
+            CurrentPlayer = GameConstants.PlayerXSymbol;
         }
 
         public bool MakeMove(int index)
         {
-            if (index < 0 || index >= 9 || Board[index] != '\0')
+            if (index < 0 || index >= GameConstants.BoardSize || Board[index] != GameConstants.EmptyCell)
                 return false;
 
             Board[index] = CurrentPlayer;
@@ -33,21 +31,16 @@ namespace Tic_Tac_Toe.Services
 
         public bool CheckWinner()
         {
-            char p = CurrentPlayer;
+            char player = CurrentPlayer;
 
-            int[,] winPatterns = new int[,]
+            for (int i = 0; i < GameConstants.WinPatterns.GetLength(0); i++)
             {
-                {0,1,2}, {3,4,5}, {6,7,8},
-                {0,3,6}, {1,4,7}, {2,5,8},
-                {0,4,8}, {2,4,6}
-            };
-
-            for (int i = 0; i < 8; i++)
-            {
-                if (Board[winPatterns[i, 0]] == p &&
-                    Board[winPatterns[i, 1]] == p &&
-                    Board[winPatterns[i, 2]] == p)
+                if (Board[GameConstants.WinPatterns[i, 0]] == player &&
+                    Board[GameConstants.WinPatterns[i, 1]] == player &&
+                    Board[GameConstants.WinPatterns[i, 2]] == player)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -55,12 +48,14 @@ namespace Tic_Tac_Toe.Services
 
         public bool CheckDraw()
         {
-            return Board.All(cell => cell != '\0');
+            return Board.All(cell => cell != GameConstants.EmptyCell);
         }
 
         public void SwitchPlayer()
         {
-            CurrentPlayer = CurrentPlayer == 'X' ? 'O' : 'X';
+            CurrentPlayer = CurrentPlayer == GameConstants.PlayerXSymbol
+                ? GameConstants.PlayerOSymbol
+                : GameConstants.PlayerXSymbol;
         }
     }
 }

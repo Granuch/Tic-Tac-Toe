@@ -12,7 +12,7 @@ namespace Tic_Tac_Toe.Services
 {
     public class DatabaseService
     {
-        private readonly string _connectionString = "Server=(localdb)\\mssqllocaldb;Database=TikTakToe;Trusted_Connection=True;";
+        private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
         public DatabaseService()
         {

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Windows;
 using Tic_Tac_Toe.DbContext;
 using Tic_Tac_Toe.RepositoryPattern;
@@ -21,16 +23,16 @@ namespace Tic_Tac_Toe
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    ConfigureServices(services);
+                    ConfigureServices(context.Configuration, services);
                 })
                 .Build();
         }
 
-        private void ConfigureServices(IServiceCollection services)
+        private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
             // Database Context
             services.AddDbContext<GameContext>(options =>
-                options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TikTakToe;Trusted_Connection=True;"));
+                   options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             // Repository Pattern
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -41,6 +43,7 @@ namespace Tic_Tac_Toe
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IGameResultService, GameResultService>();
             services.AddScoped<IGameEngine, GameEngineService>();
+            //services.AddScoped<IAppLogger, AppLogger>();
 
             // ViewModels
             services.AddTransient<GameViewModel>();
