@@ -69,7 +69,7 @@ namespace Tic_Tac_Toe.Views
                     return;
                 }
 
-                var history = historyResult.Value; // Try to use ((dynamic)historyResult).Value; if needed
+                var history = historyResult.Value; // Try to use ((dynamic)historyResult).Value; if needed here
 
                 TxtStats.Text = $"Статистика гравця: {player.Name}\n\n" +
                                $"Всього ігор: {stats.TotalGames}\n" +
