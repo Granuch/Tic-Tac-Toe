@@ -1,5 +1,7 @@
-﻿using Tic_Tac_Toe.Models;
-using Tic_Tac_Toe.RepositoryPattern;
+﻿using System.Collections;
+using Tic_Tac_Toe.Models;
+using Tic_Tac_Toe.Patterns.RepositoryPattern;
+using Tic_Tac_Toe.Patterns.ResultPattern;
 using Tic_Tac_Toe.Services.Interfaces;
 
 namespace Tic_Tac_Toe.Services
@@ -15,46 +17,86 @@ namespace Tic_Tac_Toe.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public async Task<Player> GetOrCreatePlayerAsync(string name)
+        public async Task<Result> GetOrCreatePlayerAsync(string name)
+        {
+            var validationResult = ValidatePlayerName(name);
+            if (validationResult.IsFailure)
+                return Result.Failure(validationResult.Error);
+
+            name = name.Trim();
+
+            try
+            {
+                var player = await _unitOfWork.Players.GetOrCreateAsync(name);
+
+                if (player == null)
+                    return Result.Failure("Не вдалося створити гравця");
+
+                return Result.Success(player);
+            }
+            catch (Exception ex)
+            {
+                // _logger.LogError(ex, "Error creating player {PlayerName}", name);
+
+                return Result.Failure(
+                    $"Помилка створення гравця: {ex.Message}");
+            }
+        }
+
+        public async Task<Result> GetPlayerByIdAsync(int id)
+        {
+            if (id <= 0)
+                return Result.Failure("ID гравця має бути додатнім числом");
+
+            try
+            {
+                var player = await _unitOfWork.Players.GetByIdAsync(id);
+
+                if (player == null)
+                    return Result.Failure($"Гравця з ID {id} не знайдено");
+
+                return Result.Success(player);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure(
+                    $"Помилка отримання гравця: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<IEnumerable<Player>>> GetAllPlayersAsync()
+        {
+            try
+            {
+                var players = await _unitOfWork.Players.GetAllAsync();
+                return Result.Success(players);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<IEnumerable<Player>>(
+                    $"Помилка завантаження гравців: {ex.Message}");
+            }
+        }
+
+        private Result ValidatePlayerName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException("Ім'я гравця не може бути порожнім", nameof(name));
-            }
+                return Result.Failure("Ім'я гравця не може бути порожнім");
 
             name = name.Trim();
 
             if (name.Length < MinNameLength)
-            {
-                throw new ArgumentException($"Ім'я гравця має містити принаймні {MinNameLength} символ", nameof(name));
-            }
+                return Result.Failure(
+                    $"Ім'я гравця має містити принаймні {MinNameLength} символ");
 
             if (name.Length > MaxNameLength)
-            {
-                throw new ArgumentException($"Ім'я гравця не може перевищувати {MaxNameLength} символів", nameof(name));
-            }
+                return Result.Failure(
+                    $"Ім'я гравця не може перевищувати {MaxNameLength} символів");
 
             if (name.Any(c => char.IsControl(c)))
-            {
-                throw new ArgumentException("Ім'я гравця містить неприпустимі символи", nameof(name));
-            }
+                return Result.Failure("Ім'я гравця містить неприпустимі символи");
 
-            return await _unitOfWork.Players.GetOrCreateAsync(name);
-        }
-
-        public async Task<Player?> GetPlayerByIdAsync(int id)
-        {
-            if (id <= 0)
-            {
-                throw new ArgumentException("ID гравця має бути додатнім числом", nameof(id));
-            }
-
-            return await _unitOfWork.Players.GetByIdAsync(id);
-        }
-
-        public async Task<IEnumerable<Player>> GetAllPlayersAsync()
-        {
-            return await _unitOfWork.Players.GetAllAsync();
+            return Result.Success();
         }
     }
 }

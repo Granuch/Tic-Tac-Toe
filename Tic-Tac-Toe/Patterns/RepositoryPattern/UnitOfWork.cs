@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Tic_Tac_Toe.DbContext;
 
-namespace Tic_Tac_Toe.RepositoryPattern
+namespace Tic_Tac_Toe.Patterns.RepositoryPattern
 {
     public class UnitOfWork : IUnitOfWork
     {
@@ -69,7 +69,6 @@ namespace Tic_Tac_Toe.RepositoryPattern
         public void Dispose()
         {
             _transaction?.Dispose();
-            _context.Dispose();
         }
     }
 }

@@ -5,7 +5,7 @@ using Tic_Tac_Toe.DbContext;
 using Tic_Tac_Toe.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Tic_Tac_Toe.RepositoryPattern
+namespace Tic_Tac_Toe.Patterns.RepositoryPattern
 {
     public class GameResultRepository : Repository<GameResult>, IGameResultRepository
     {

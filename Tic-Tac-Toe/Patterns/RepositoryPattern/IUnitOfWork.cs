@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Tic_Tac_Toe.RepositoryPattern
+namespace Tic_Tac_Toe.Patterns.RepositoryPattern
 {
     public interface IUnitOfWork : IDisposable
     {

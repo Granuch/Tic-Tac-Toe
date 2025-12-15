@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Windows;
 using Tic_Tac_Toe.DbContext;
-using Tic_Tac_Toe.RepositoryPattern;
+using Tic_Tac_Toe.Patterns.RepositoryPattern;
 using Tic_Tac_Toe.Services;
 using Tic_Tac_Toe.Services.Interfaces;
 using Tic_Tac_Toe.ViewModels;
@@ -43,7 +43,7 @@ namespace Tic_Tac_Toe
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IGameResultService, GameResultService>();
             services.AddScoped<IGameEngine, GameEngineService>();
-            //services.AddScoped<IAppLogger, AppLogger>();
+            services.AddScoped<IAppLogger, AppLogger>();
 
             // ViewModels
             services.AddTransient<GameViewModel>();

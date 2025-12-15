@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using Tic_Tac_Toe.DbContext;
 
-namespace Tic_Tac_Toe.RepositoryPattern
+namespace Tic_Tac_Toe.Patterns.RepositoryPattern
 {
     public interface IRepository<T> where T : class
     {

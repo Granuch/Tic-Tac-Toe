@@ -1,12 +1,13 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Tic_Tac_Toe.Patterns.ResultPattern;
 
 namespace Tic_Tac_Toe.Views
 {
     public partial class PlayerSelectionWindow : Window
     {
-        public string PlayerXName { get; private set; }
-        public string PlayerOName { get; private set; }
+        public string PlayerXName { get; private set; } = string.Empty;
+        public string PlayerOName { get; private set; } = string.Empty;
         public bool IsPlayingWithBot { get; private set; }
         public int BotDifficulty { get; private set; }
 
@@ -34,15 +35,15 @@ namespace Tic_Tac_Toe.Views
 
         private void StartGame_Click(object sender, RoutedEventArgs e)
         {
-            PlayerXName = TxtPlayerX.Text.Trim();
-
-            if (string.IsNullOrEmpty(PlayerXName))
+            var playerXValidation = ValidatePlayerName(TxtPlayerX.Text, "X");
+            if (playerXValidation.IsFailure)
             {
-                MessageBox.Show("Введіть ім'я гравця X!", "Помилка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowError(playerXValidation.Error);
+                TxtPlayerX.Focus();
                 return;
             }
 
+            PlayerXName = TxtPlayerX.Text.Trim();
             IsPlayingWithBot = RadioPvE.IsChecked == true;
 
             if (IsPlayingWithBot)
@@ -52,18 +53,54 @@ namespace Tic_Tac_Toe.Views
             }
             else
             {
+                var playerOValidation = ValidatePlayerName(TxtPlayerO.Text, "O");
+                if (playerOValidation.IsFailure)
+                {
+                    ShowError(playerOValidation.Error);
+                    TxtPlayerO.Focus();
+                    return;
+                }
+
                 PlayerOName = TxtPlayerO.Text.Trim();
 
-                if (string.IsNullOrEmpty(PlayerOName))
+                if (PlayerXName.Equals(PlayerOName, StringComparison.OrdinalIgnoreCase))
                 {
-                    MessageBox.Show("Введіть ім'я гравця O!", "Помилка",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ShowError("Імена гравців мають відрізнятися!");
+                    TxtPlayerO.Focus();
                     return;
                 }
             }
 
             DialogResult = true;
             Close();
+        }
+
+        private Result ValidatePlayerName(string name, string playerLabel)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return Result.Failure($"Введіть ім'я гравця {playerLabel}!");
+
+            name = name.Trim();
+
+            if (name.Length < 1)
+                return Result.Failure($"Ім'я гравця {playerLabel} занадто коротке!");
+
+            if (name.Length > 100)
+                return Result.Failure($"Ім'я гравця {playerLabel} занадто довге (макс. 100 символів)!");
+
+            if (name.Any(c => char.IsControl(c)))
+                return Result.Failure($"Ім'я гравця {playerLabel} містить неприпустимі символи!");
+
+            return Result.Success();
+        }
+
+        private void ShowError(string message)
+        {
+            MessageBox.Show(
+                message,
+                "Помилка",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
         }
     }
 }

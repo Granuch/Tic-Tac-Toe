@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using Tic_Tac_Toe.Models;
+using Tic_Tac_Toe.Patterns.ResultPattern;
 using Tic_Tac_Toe.Services;
 using Tic_Tac_Toe.Services.Interfaces;
 
@@ -64,33 +65,33 @@ namespace Tic_Tac_Toe.ViewModels
         }
 
         public async Task InitializeAsync(string playerXName, string playerOName, bool isPlayingWithBot, int botDifficulty)
-        {
+            {
             try
             {
                 Debug.WriteLine($"=== InitializeAsync START ===");
-                Debug.WriteLine($"PlayerX: {playerXName}, PlayerO: {playerOName}, Bot: {isPlayingWithBot}, Difficulty: {botDifficulty}");
-
                 StatusText = "Завантаження гравців...";
 
                 _isPlayingWithBot = isPlayingWithBot;
 
-                Debug.WriteLine("Getting Player X...");
-                _playerX = await _playerService.GetOrCreatePlayerAsync(playerXName);
+                var playerXResult = await _playerService.GetOrCreatePlayerAsync(playerXName);
+                if (playerXResult.IsFailure)
+                {
+                    StatusText = "Помилка завантаження гравця X";
+                    await ShowErrorAsync(playerXResult.Error);
+                    return;
+                }
+                _playerX = (playerXResult as Result<Player>)?.Value;
                 Debug.WriteLine($"Player X loaded: {_playerX?.Name} (ID: {_playerX?.Id})");
 
-                if (_playerX == null)
+                var playerOResult = await _playerService.GetOrCreatePlayerAsync(playerOName);
+                if (playerOResult.IsFailure)
                 {
-                    throw new Exception("Failed to load Player X");
+                    StatusText = "Помилка завантаження гравця O";
+                    await ShowErrorAsync(playerOResult.Error);
+                    return;
                 }
-
-                Debug.WriteLine("Getting Player O...");
-                _playerO = await _playerService.GetOrCreatePlayerAsync(playerOName);
+                _playerO = (playerOResult as Result<Player>)?.Value;
                 Debug.WriteLine($"Player O loaded: {_playerO?.Name} (ID: {_playerO?.Id})");
-
-                if (_playerO == null)
-                {
-                    throw new Exception("Failed to load Player O");
-                }
 
                 if (_isPlayingWithBot)
                 {
@@ -98,27 +99,15 @@ namespace Tic_Tac_Toe.ViewModels
                     Debug.WriteLine($"Bot initialized with difficulty: {(BotDifficulty)botDifficulty}");
                 }
 
-                Debug.WriteLine($"Both players loaded successfully");
                 _isInitialized = true;
-
-                Debug.WriteLine("Starting new game...");
                 StartNewGame();
                 Debug.WriteLine("=== InitializeAsync COMPLETE ===");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"=== ERROR in InitializeAsync ===");
-                Debug.WriteLine($"Message: {ex.Message}");
-                Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-
-                StatusText = "Помилка ініціалізації!";
-
-                MessageBox.Show($"Помилка ініціалізації гри: {ex.Message}",
-                    "Помилка",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-
-                throw;
+                Debug.WriteLine($"=== UNEXPECTED ERROR in InitializeAsync: {ex.Message} ===");
+                StatusText = "Критична помилка!";
+                await ShowErrorAsync($"Неочікувана помилка: {ex.Message}");
             }
         }
 
@@ -286,24 +275,32 @@ namespace Tic_Tac_Toe.ViewModels
             try
             {
                 if (_playerX == null || _playerO == null)
+                {
+                    Debug.WriteLine("Cannot save game result: players not initialized");
                     return;
+                }
 
-                await _gameResultService.SaveGameResultAsync(
+                var result = await _gameResultService.SaveGameResultAsync(
                     _playerX.Id,
                     _playerO.Id,
                     winner,
                     _gameTimer.Elapsed
                 );
+
+                if (result.IsFailure)
+                {
+                    Debug.WriteLine($"Failed to save game result: {result.Error}");
+
+                    StatusText = "Гру завершено (результат не збережено)";
+                }
+                else
+                {
+                    Debug.WriteLine("Game result saved successfully");
+                }
             }
             catch (Exception ex)
             {
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    MessageBox.Show($"Помилка збереження результату: {ex.Message}",
-                        "Помилка",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                });
+                Debug.WriteLine($"Unexpected error saving game result: {ex.Message}");
             }
         }
 
@@ -313,6 +310,18 @@ namespace Tic_Tac_Toe.ViewModels
             {
                 StartNewGame();
             }
+        }
+
+        private async Task ShowErrorAsync(string message)
+        {
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                MessageBox.Show(
+                    message,
+                    "Помилка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            });
         }
     }
 }
