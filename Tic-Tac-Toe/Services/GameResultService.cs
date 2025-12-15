@@ -99,10 +99,10 @@ namespace Tic_Tac_Toe.Services
             }
         }
 
-        public async Task<Result> GetPlayerStatisticsAsync(int playerId)
+        public async Task<Result<PlayerStatistics>> GetPlayerStatisticsAsync(int playerId)
         {
             if (playerId <= 0)
-                return Result.Failure("Невірний ID гравця");
+                return Result.Failure<PlayerStatistics>("Невірний ID гравця");
 
             try
             {
@@ -122,7 +122,7 @@ namespace Tic_Tac_Toe.Services
             }
             catch (Exception ex)
             {
-                return Result.Failure(
+                return Result.Failure<PlayerStatistics>(
                     $"Помилка обчислення статистики: {ex.Message}");
             }
         }

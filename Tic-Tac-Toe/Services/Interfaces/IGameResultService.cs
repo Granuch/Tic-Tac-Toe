@@ -12,7 +12,7 @@ namespace Tic_Tac_Toe.Services.Interfaces
         Task<Result> SaveGameResultAsync(int playerXId, int playerOId, string winner, TimeSpan duration);
         Task<Result<IEnumerable<GameResult>>> GetPlayerGameHistoryAsync(int playerId);
         Task<Result<IEnumerable<GameResult>>> GetRecentGamesAsync(int playerId, int count = 10);
-        Task<Result> GetPlayerStatisticsAsync(int playerId);
+        Task<Result<PlayerStatistics>> GetPlayerStatisticsAsync(int playerId);
     }
 
     public class PlayerStatistics

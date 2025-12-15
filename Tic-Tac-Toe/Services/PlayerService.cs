@@ -17,11 +17,11 @@ namespace Tic_Tac_Toe.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public async Task<Result> GetOrCreatePlayerAsync(string name)
+        public async Task<Result<Player>> GetOrCreatePlayerAsync(string name)
         {
             var validationResult = ValidatePlayerName(name);
             if (validationResult.IsFailure)
-                return Result.Failure(validationResult.Error);
+                return Result.Failure<Player>(validationResult.Error);
 
             name = name.Trim();
 
@@ -30,7 +30,7 @@ namespace Tic_Tac_Toe.Services
                 var player = await _unitOfWork.Players.GetOrCreateAsync(name);
 
                 if (player == null)
-                    return Result.Failure("Не вдалося створити гравця");
+                    return Result.Failure<Player>("Не вдалося створити гравця");
 
                 return Result.Success(player);
             }
@@ -38,28 +38,28 @@ namespace Tic_Tac_Toe.Services
             {
                 // _logger.LogError(ex, "Error creating player {PlayerName}", name);
 
-                return Result.Failure(
+                return Result.Failure<Player>(
                     $"Помилка створення гравця: {ex.Message}");
             }
         }
 
-        public async Task<Result> GetPlayerByIdAsync(int id)
+        public async Task<Result<Player>> GetPlayerByIdAsync(int id)
         {
             if (id <= 0)
-                return Result.Failure("ID гравця має бути додатнім числом");
+                return Result.Failure<Player>("ID гравця має бути додатнім числом");
 
             try
             {
                 var player = await _unitOfWork.Players.GetByIdAsync(id);
 
                 if (player == null)
-                    return Result.Failure($"Гравця з ID {id} не знайдено");
+                    return Result.Failure<Player>($"Гравця з ID {id} не знайдено");
 
                 return Result.Success(player);
             }
             catch (Exception ex)
             {
-                return Result.Failure(
+                return Result.Failure<Player>(
                     $"Помилка отримання гравця: {ex.Message}");
             }
         }

@@ -10,9 +10,9 @@ namespace Tic_Tac_Toe.Services.Interfaces
     public interface IPlayerService
     {
 
-        Task<Result> GetOrCreatePlayerAsync(string name);
+        Task<Result<Player>> GetOrCreatePlayerAsync(string name);
 
-        Task<Result> GetPlayerByIdAsync(int id);
+        Task<Result<Player>> GetPlayerByIdAsync(int id);
 
         Task<Result<IEnumerable<Player>>> GetAllPlayersAsync();
     }

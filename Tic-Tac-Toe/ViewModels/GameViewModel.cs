@@ -65,7 +65,7 @@ namespace Tic_Tac_Toe.ViewModels
         }
 
         public async Task InitializeAsync(string playerXName, string playerOName, bool isPlayingWithBot, int botDifficulty)
-            {
+        {
             try
             {
                 Debug.WriteLine($"=== InitializeAsync START ===");
@@ -80,7 +80,7 @@ namespace Tic_Tac_Toe.ViewModels
                     await ShowErrorAsync(playerXResult.Error);
                     return;
                 }
-                _playerX = (playerXResult as Result<Player>)?.Value;
+                _playerX = playerXResult.Value;
                 Debug.WriteLine($"Player X loaded: {_playerX?.Name} (ID: {_playerX?.Id})");
 
                 var playerOResult = await _playerService.GetOrCreatePlayerAsync(playerOName);
@@ -90,7 +90,7 @@ namespace Tic_Tac_Toe.ViewModels
                     await ShowErrorAsync(playerOResult.Error);
                     return;
                 }
-                _playerO = (playerOResult as Result<Player>)?.Value;
+                _playerO = playerOResult.Value;
                 Debug.WriteLine($"Player O loaded: {_playerO?.Name} (ID: {_playerO?.Id})");
 
                 if (_isPlayingWithBot)
@@ -290,7 +290,6 @@ namespace Tic_Tac_Toe.ViewModels
                 if (result.IsFailure)
                 {
                     Debug.WriteLine($"Failed to save game result: {result.Error}");
-
                     StatusText = "Гру завершено (результат не збережено)";
                 }
                 else

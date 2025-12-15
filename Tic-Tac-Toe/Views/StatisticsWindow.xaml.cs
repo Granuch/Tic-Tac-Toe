@@ -59,7 +59,7 @@ namespace Tic_Tac_Toe.Views
                     return;
                 }
 
-                var stats = ((dynamic)statsResult).Value;
+                var stats = statsResult.Value;
 
                 var historyResult = await _gameResultService.GetRecentGamesAsync(player.Id, 10);
 
@@ -69,7 +69,7 @@ namespace Tic_Tac_Toe.Views
                     return;
                 }
 
-                var history = historyResult.Value; // Try to use ((dynamic)historyResult).Value; if needed here
+                var history = historyResult.Value;
 
                 TxtStats.Text = $"Статистика гравця: {player.Name}\n\n" +
                                $"Всього ігор: {stats.TotalGames}\n" +
