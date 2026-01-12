@@ -37,5 +37,10 @@ namespace Tic_Tac_Toe.Patterns.ResultPattern
         {
             Value = value;
         }
+
+        public TResult Match<TResult>(Func<T, TResult> onSuccess, Func<string, TResult> onFailure)
+        {
+            return IsSuccess ? onSuccess(Value!) : onFailure(Error);
+        }
     }
 }

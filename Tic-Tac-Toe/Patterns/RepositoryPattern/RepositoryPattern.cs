@@ -9,13 +9,13 @@ namespace Tic_Tac_Toe.Patterns.RepositoryPattern
 {
     public interface IRepository<T> where T : class
     {
-        Task<IEnumerable<T>> GetAllAsync();
-        Task<T> GetByIdAsync(int id);
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
-        Task AddAsync(T entity);
+        Task<IEnumerable<T>> GetAllAsync(CancellationToken ct = default);
+        Task<T?> GetByIdAsync(int id, CancellationToken ct = default);
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
+        Task AddAsync(T entity, CancellationToken ct = default);
         void Update(T entity);
         void Delete(T entity);
-        Task SaveAsync();
+        Task SaveAsync(CancellationToken ct = default);
     }
 
     public class Repository<T> : IRepository<T> where T : class
@@ -29,24 +29,24 @@ namespace Tic_Tac_Toe.Patterns.RepositoryPattern
             _dbSet = context.Set<T>();
         }
 
-        public async virtual Task<IEnumerable<T>> GetAllAsync()
+        public async virtual Task<IEnumerable<T>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.ToListAsync(ct);
         }
 
-        public async virtual Task<T> GetByIdAsync(int id)
+        public async virtual Task<T?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            return await _dbSet.FindAsync(id);
+            return await _dbSet.FindAsync([id], ct);
         }
 
-        public async virtual Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public async virtual Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default)
         {
-            return await _dbSet.Where(predicate).ToListAsync();
+            return await _dbSet.Where(predicate).ToListAsync(ct);
         }
 
-        public virtual async Task AddAsync(T entity)
+        public virtual async Task AddAsync(T entity, CancellationToken ct = default)
         {
-            await _dbSet.AddAsync(entity);
+            await _dbSet.AddAsync(entity, ct);
         }
 
         public virtual void Update(T entity)
@@ -63,9 +63,9 @@ namespace Tic_Tac_Toe.Patterns.RepositoryPattern
             _dbSet.Remove(entity);
         }
 
-        public async Task SaveAsync()
+        public async Task SaveAsync(CancellationToken ct = default)
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
         }
     }
 }

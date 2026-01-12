@@ -9,10 +9,10 @@ namespace Tic_Tac_Toe.Services.Interfaces
 {
     public interface IGameResultService
     {
-        Task<Result> SaveGameResultAsync(int playerXId, int playerOId, string winner, TimeSpan duration);
-        Task<Result<IEnumerable<GameResult>>> GetPlayerGameHistoryAsync(int playerId);
-        Task<Result<IEnumerable<GameResult>>> GetRecentGamesAsync(int playerId, int count = 10);
-        Task<Result<PlayerStatistics>> GetPlayerStatisticsAsync(int playerId);
+        Task<Result> SaveGameResultAsync(int playerXId, int playerOId, string winner, TimeSpan duration, CancellationToken ct = default);
+        Task<Result<IEnumerable<GameResult>>> GetPlayerGameHistoryAsync(int playerId, CancellationToken ct = default);
+        Task<Result<IEnumerable<GameResult>>> GetRecentGamesAsync(int playerId, int count = 10, CancellationToken ct = default);
+        Task<Result<PlayerStatistics>> GetPlayerStatisticsAsync(int playerId, CancellationToken ct = default);
     }
 
     public class PlayerStatistics

@@ -7,7 +7,7 @@ namespace Tic_Tac_Toe.Patterns.RepositoryPattern
 {
     public interface IPlayerRepository : IRepository<Player>
     {
-        Task<Player?> GetByNameAsync(string name);
-        Task<Player> GetOrCreateAsync(string name);
+        Task<Player?> GetByNameAsync(string name, CancellationToken ct = default);
+        Task<Player> GetOrCreateAsync(string name, CancellationToken ct = default);
     }
 }

@@ -17,7 +17,7 @@ namespace Tic_Tac_Toe.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public async Task<Result<Player>> GetOrCreatePlayerAsync(string name)
+        public async Task<Result<Player>> GetOrCreatePlayerAsync(string name, CancellationToken ct = default)
         {
             var validationResult = ValidatePlayerName(name);
             if (validationResult.IsFailure)
@@ -27,35 +27,41 @@ namespace Tic_Tac_Toe.Services
 
             try
             {
-                var player = await _unitOfWork.Players.GetOrCreateAsync(name);
+                var player = await _unitOfWork.Players.GetOrCreateAsync(name, ct);
 
                 if (player == null)
                     return Result.Failure<Player>("Не вдалося створити гравця");
 
                 return Result.Success(player);
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                // _logger.LogError(ex, "Error creating player {PlayerName}", name);
-
                 return Result.Failure<Player>(
                     $"Помилка створення гравця: {ex.Message}");
             }
         }
 
-        public async Task<Result<Player>> GetPlayerByIdAsync(int id)
+        public async Task<Result<Player>> GetPlayerByIdAsync(int id, CancellationToken ct = default)
         {
             if (id <= 0)
                 return Result.Failure<Player>("ID гравця має бути додатнім числом");
 
             try
             {
-                var player = await _unitOfWork.Players.GetByIdAsync(id);
+                var player = await _unitOfWork.Players.GetByIdAsync(id, ct);
 
                 if (player == null)
                     return Result.Failure<Player>($"Гравця з ID {id} не знайдено");
 
                 return Result.Success(player);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -64,12 +70,16 @@ namespace Tic_Tac_Toe.Services
             }
         }
 
-        public async Task<Result<IEnumerable<Player>>> GetAllPlayersAsync()
+        public async Task<Result<IEnumerable<Player>>> GetAllPlayersAsync(CancellationToken ct = default)
         {
             try
             {
-                var players = await _unitOfWork.Players.GetAllAsync();
+                var players = await _unitOfWork.Players.GetAllAsync(ct);
                 return Result.Success(players);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

@@ -22,7 +22,8 @@ namespace Tic_Tac_Toe.Services
             int playerXId,
             int playerOId,
             string winner,
-            TimeSpan duration)
+            TimeSpan duration,
+            CancellationToken ct = default)
         {
             if (playerXId <= 0)
                 return Result.Failure("Невірний ID гравця X");
@@ -47,10 +48,14 @@ namespace Tic_Tac_Toe.Services
                     PlayedAt = DateTime.Now
                 };
 
-                await _unitOfWork.GameResults.AddAsync(gameResult);
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.GameResults.AddAsync(gameResult, ct);
+                await _unitOfWork.SaveChangesAsync(ct);
 
                 return Result.Success();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -59,15 +64,19 @@ namespace Tic_Tac_Toe.Services
             }
         }
 
-        public async Task<Result<IEnumerable<GameResult>>> GetPlayerGameHistoryAsync(int playerId)
+        public async Task<Result<IEnumerable<GameResult>>> GetPlayerGameHistoryAsync(int playerId, CancellationToken ct = default)
         {
             if (playerId <= 0)
                 return Result.Failure<IEnumerable<GameResult>>("Невірний ID гравця");
 
             try
             {
-                var games = await _unitOfWork.GameResults.GetPlayerGamesAsync(playerId);
+                var games = await _unitOfWork.GameResults.GetPlayerGamesAsync(playerId, ct);
                 return Result.Success(games);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -78,7 +87,8 @@ namespace Tic_Tac_Toe.Services
 
         public async Task<Result<IEnumerable<GameResult>>> GetRecentGamesAsync(
             int playerId,
-            int count = 10)
+            int count = 10,
+            CancellationToken ct = default)
         {
             if (playerId <= 0)
                 return Result.Failure<IEnumerable<GameResult>>("Невірний ID гравця");
@@ -89,8 +99,12 @@ namespace Tic_Tac_Toe.Services
 
             try
             {
-                var games = await _unitOfWork.GameResults.GetRecentGamesAsync(playerId, count);
+                var games = await _unitOfWork.GameResults.GetRecentGamesAsync(playerId, count, ct);
                 return Result.Success(games);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -99,14 +113,14 @@ namespace Tic_Tac_Toe.Services
             }
         }
 
-        public async Task<Result<PlayerStatistics>> GetPlayerStatisticsAsync(int playerId)
+        public async Task<Result<PlayerStatistics>> GetPlayerStatisticsAsync(int playerId, CancellationToken ct = default)
         {
             if (playerId <= 0)
                 return Result.Failure<PlayerStatistics>("Невірний ID гравця");
 
             try
             {
-                var games = await _unitOfWork.GameResults.GetPlayerGamesAsync(playerId);
+                var games = await _unitOfWork.GameResults.GetPlayerGamesAsync(playerId, ct);
                 var gamesList = games.ToList();
 
                 var stats = new PlayerStatistics
@@ -119,6 +133,10 @@ namespace Tic_Tac_Toe.Services
                 stats.Losses = stats.TotalGames - stats.Wins - stats.Draws;
 
                 return Result.Success(stats);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

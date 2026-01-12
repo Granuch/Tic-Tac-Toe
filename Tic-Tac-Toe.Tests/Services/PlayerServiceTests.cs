@@ -31,7 +31,7 @@ namespace Tic_Tac_Toe.Tests.Services
             var playerName = "TestPlayer";
             var expectedPlayer = new Player { Id = 1, Name = playerName };
 
-            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(playerName))
+            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(playerName, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedPlayer);
 
             // Act
@@ -52,7 +52,7 @@ namespace Tic_Tac_Toe.Tests.Services
             var trimmedName = "TestPlayer";
             var expectedPlayer = new Player { Id = 1, Name = trimmedName };
 
-            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(trimmedName))
+            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(trimmedName, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedPlayer);
 
             // Act
@@ -128,7 +128,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task GetOrCreatePlayerAsync_WhenRepositoryReturnsNull_ShouldReturnFailure()
         {
             // Arrange
-            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(It.IsAny<string>()))
+            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Player?)null);
 
             // Act
@@ -143,7 +143,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task GetOrCreatePlayerAsync_WhenExceptionThrown_ShouldReturnFailure()
         {
             // Arrange
-            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(It.IsAny<string>()))
+            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
@@ -165,7 +165,7 @@ namespace Tic_Tac_Toe.Tests.Services
             var playerId = 1;
             var expectedPlayer = new Player { Id = playerId, Name = "TestPlayer" };
 
-            _mockPlayerRepo.Setup(r => r.GetByIdAsync(playerId))
+            _mockPlayerRepo.Setup(r => r.GetByIdAsync(playerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedPlayer);
 
             // Act
@@ -203,7 +203,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task GetPlayerByIdAsync_WhenPlayerNotFound_ShouldReturnFailure()
         {
             // Arrange
-            _mockPlayerRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
+            _mockPlayerRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Player?)null);
 
             // Act
@@ -218,7 +218,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task GetPlayerByIdAsync_WhenExceptionThrown_ShouldReturnFailure()
         {
             // Arrange
-            _mockPlayerRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
+            _mockPlayerRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
@@ -244,7 +244,7 @@ namespace Tic_Tac_Toe.Tests.Services
                 new Player { Id = 3, Name = "Player3" }
             };
 
-            _mockPlayerRepo.Setup(r => r.GetAllAsync())
+            _mockPlayerRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(players);
 
             // Act
@@ -260,7 +260,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task GetAllPlayersAsync_WithNoPlayers_ShouldReturnEmptyCollection()
         {
             // Arrange
-            _mockPlayerRepo.Setup(r => r.GetAllAsync())
+            _mockPlayerRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<Player>());
 
             // Act
@@ -276,7 +276,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task GetAllPlayersAsync_WhenExceptionThrown_ShouldReturnFailure()
         {
             // Arrange
-            _mockPlayerRepo.Setup(r => r.GetAllAsync())
+            _mockPlayerRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
@@ -300,7 +300,7 @@ namespace Tic_Tac_Toe.Tests.Services
         {
             // Arrange
             var expectedPlayer = new Player { Id = 1, Name = name.Trim() };
-            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(It.IsAny<string>()))
+            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedPlayer);
 
             // Act
@@ -316,7 +316,7 @@ namespace Tic_Tac_Toe.Tests.Services
             // Arrange
             var maxLengthName = new string('A', 100); // Exactly 100 characters
             var expectedPlayer = new Player { Id = 1, Name = maxLengthName };
-            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(maxLengthName))
+            _mockPlayerRepo.Setup(r => r.GetOrCreateAsync(maxLengthName, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedPlayer);
 
             // Act

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Tic_Tac_Toe.DbContext;
+using System.Threading;
 
 namespace Tic_Tac_Toe.Patterns.RepositoryPattern
 {
@@ -36,31 +37,31 @@ namespace Tic_Tac_Toe.Patterns.RepositoryPattern
             }
         }
 
-        public async Task<int> SaveChangesAsync()
+        public async Task<int> SaveChangesAsync(CancellationToken ct = default)
         {
-            return await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync(ct);
         }
 
-        public async Task BeginTransactionAsync()
+        public async Task BeginTransactionAsync(CancellationToken ct = default)
         {
-            _transaction = await _context.Database.BeginTransactionAsync();
+            _transaction = await _context.Database.BeginTransactionAsync(ct);
         }
 
-        public async Task CommitTransactionAsync()
+        public async Task CommitTransactionAsync(CancellationToken ct = default)
         {
             if (_transaction != null)
             {
-                await _transaction.CommitAsync();
+                await _transaction.CommitAsync(ct);
                 await _transaction.DisposeAsync();
                 _transaction = null;
             }
         }
 
-        public async Task RollbackTransactionAsync()
+        public async Task RollbackTransactionAsync(CancellationToken ct = default)
         {
             if (_transaction != null)
             {
-                await _transaction.RollbackAsync();
+                await _transaction.RollbackAsync(ct);
                 await _transaction.DisposeAsync();
                 _transaction = null;
             }

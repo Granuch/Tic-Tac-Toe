@@ -13,21 +13,21 @@ namespace Tic_Tac_Toe.Patterns.RepositoryPattern
         {
         }
 
-        public async Task<IEnumerable<GameResult>> GetPlayerGamesAsync(int playerId)
+        public async Task<IEnumerable<GameResult>> GetPlayerGamesAsync(int playerId, CancellationToken ct = default)
         {
             return await _dbSet
                 .Where(g => g.PlayerX == playerId || g.PlayerO == playerId)
                 .OrderByDescending(g => g.PlayedAt)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<GameResult>> GetRecentGamesAsync(int playerId, int count = 10)
+        public async Task<IEnumerable<GameResult>> GetRecentGamesAsync(int playerId, int count = 10, CancellationToken ct = default)
         {
             return await _dbSet
                 .Where(g => g.PlayerX == playerId || g.PlayerO == playerId)
                 .OrderByDescending(g => g.PlayedAt)
                 .Take(count)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
     }
 }

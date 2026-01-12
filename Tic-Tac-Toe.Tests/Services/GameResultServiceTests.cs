@@ -33,9 +33,9 @@ namespace Tic_Tac_Toe.Tests.Services
             string winner = "1";
             var duration = TimeSpan.FromMinutes(5);
 
-            _mockGameResultRepo.Setup(r => r.AddAsync(It.IsAny<GameResult>()))
+            _mockGameResultRepo.Setup(r => r.AddAsync(It.IsAny<GameResult>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
-            _mockUnitOfWork.Setup(u => u.SaveChangesAsync())
+            _mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
 
             // Act
@@ -44,8 +44,8 @@ namespace Tic_Tac_Toe.Tests.Services
             // Assert
             Assert.True(result.IsSuccess);
             Assert.Empty(result.Error);
-            _mockGameResultRepo.Verify(r => r.AddAsync(It.IsAny<GameResult>()), Times.Once);
-            _mockUnitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
+            _mockGameResultRepo.Verify(r => r.AddAsync(It.IsAny<GameResult>(), It.IsAny<CancellationToken>()), Times.Once);
+            _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace Tic_Tac_Toe.Tests.Services
             Assert.False(result.IsSuccess);
             Assert.True(result.IsFailure);
             Assert.NotEmpty(result.Error);
-            _mockGameResultRepo.Verify(r => r.AddAsync(It.IsAny<GameResult>()), Times.Never);
+            _mockGameResultRepo.Verify(r => r.AddAsync(It.IsAny<GameResult>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task SaveGameResultAsync_WhenExceptionThrown_ShouldReturnFailure()
         {
             // Arrange
-            _mockGameResultRepo.Setup(r => r.AddAsync(It.IsAny<GameResult>()))
+            _mockGameResultRepo.Setup(r => r.AddAsync(It.IsAny<GameResult>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
@@ -149,7 +149,7 @@ namespace Tic_Tac_Toe.Tests.Services
                 }
             };
 
-            _mockGameResultRepo.Setup(r => r.GetPlayerGamesAsync(playerId))
+            _mockGameResultRepo.Setup(r => r.GetPlayerGamesAsync(playerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(games);
 
             // Act
@@ -176,7 +176,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task GetPlayerGameHistoryAsync_WhenExceptionThrown_ShouldReturnFailure()
         {
             // Arrange
-            _mockGameResultRepo.Setup(r => r.GetPlayerGamesAsync(It.IsAny<int>()))
+            _mockGameResultRepo.Setup(r => r.GetPlayerGamesAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
@@ -209,7 +209,7 @@ namespace Tic_Tac_Toe.Tests.Services
                 })
                 .ToList();
 
-            _mockGameResultRepo.Setup(r => r.GetRecentGamesAsync(playerId, count))
+            _mockGameResultRepo.Setup(r => r.GetRecentGamesAsync(playerId, count, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(games);
 
             // Act
@@ -295,7 +295,7 @@ namespace Tic_Tac_Toe.Tests.Services
                 }  // Draw
             };
 
-            _mockGameResultRepo.Setup(r => r.GetPlayerGamesAsync(playerId))
+            _mockGameResultRepo.Setup(r => r.GetPlayerGamesAsync(playerId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(games);
 
             // Act
@@ -315,7 +315,7 @@ namespace Tic_Tac_Toe.Tests.Services
         public async Task GetPlayerStatisticsAsync_WithNoGames_ShouldReturnZeroStats()
         {
             // Arrange
-            _mockGameResultRepo.Setup(r => r.GetPlayerGamesAsync(It.IsAny<int>()))
+            _mockGameResultRepo.Setup(r => r.GetPlayerGamesAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<GameResult>());
 
             // Act

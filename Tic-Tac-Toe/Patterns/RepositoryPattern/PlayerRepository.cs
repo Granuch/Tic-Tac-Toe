@@ -13,21 +13,21 @@ namespace Tic_Tac_Toe.Patterns.RepositoryPattern
         {
         }
 
-        public async Task<Player?> GetByNameAsync(string name)
+        public async Task<Player?> GetByNameAsync(string name, CancellationToken ct = default)
         {
             return await _dbSet
-                .FirstOrDefaultAsync(p => p.Name == name);
+                .FirstOrDefaultAsync(p => p.Name == name, ct);
         }
 
-        public async Task<Player> GetOrCreateAsync(string name)
+        public async Task<Player> GetOrCreateAsync(string name, CancellationToken ct = default)
         {
-            var player = await GetByNameAsync(name);
+            var player = await GetByNameAsync(name, ct);
 
             if (player == null)
             {
                 player = new Player { Name = name };
-                await AddAsync(player);
-                await _context.SaveChangesAsync();
+                await AddAsync(player, ct);
+                await _context.SaveChangesAsync(ct);
             }
 
             return player;

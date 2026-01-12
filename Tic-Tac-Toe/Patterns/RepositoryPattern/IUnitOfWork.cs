@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Tic_Tac_Toe.Patterns.RepositoryPattern
 {
@@ -8,9 +9,9 @@ namespace Tic_Tac_Toe.Patterns.RepositoryPattern
     {
         IPlayerRepository Players { get; }
         IGameResultRepository GameResults { get; }
-        Task<int> SaveChangesAsync();
-        Task BeginTransactionAsync();
-        Task CommitTransactionAsync();
-        Task RollbackTransactionAsync();
+        Task<int> SaveChangesAsync(CancellationToken ct = default);
+        Task BeginTransactionAsync(CancellationToken ct = default);
+        Task CommitTransactionAsync(CancellationToken ct = default);
+        Task RollbackTransactionAsync(CancellationToken ct = default);
     }
 }

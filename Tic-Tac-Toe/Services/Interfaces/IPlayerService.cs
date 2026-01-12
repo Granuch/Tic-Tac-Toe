@@ -9,11 +9,10 @@ namespace Tic_Tac_Toe.Services.Interfaces
 {
     public interface IPlayerService
     {
+        Task<Result<Player>> GetOrCreatePlayerAsync(string name, CancellationToken ct = default);
 
-        Task<Result<Player>> GetOrCreatePlayerAsync(string name);
+        Task<Result<Player>> GetPlayerByIdAsync(int id, CancellationToken ct = default);
 
-        Task<Result<Player>> GetPlayerByIdAsync(int id);
-
-        Task<Result<IEnumerable<Player>>> GetAllPlayersAsync();
+        Task<Result<IEnumerable<Player>>> GetAllPlayersAsync(CancellationToken ct = default);
     }
 }
