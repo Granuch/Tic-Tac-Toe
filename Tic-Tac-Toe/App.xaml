@@ -3,6 +3,323 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Tic_Tac_Toe">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <!-- Color Palette -->
+            <Color x:Key="PrimaryDark">#1a1a2e</Color>
+            <Color x:Key="SecondaryDark">#16213e</Color>
+            <Color x:Key="AccentBlue">#0f3460</Color>
+            <Color x:Key="AccentPink">#e94560</Color>
+            <Color x:Key="AccentCyan">#00d9ff</Color>
+            <Color x:Key="TextLight">#eaeaea</Color>
+            <Color x:Key="TextMuted">#8892b0</Color>
+            <Color x:Key="SuccessGreen">#64ffda</Color>
+            <Color x:Key="WarningOrange">#ffa726</Color>
+            
+            <!-- Brushes -->
+            <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDark}"/>
+            <SolidColorBrush x:Key="SecondaryDarkBrush" Color="{StaticResource SecondaryDark}"/>
+            <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}"/>
+            <SolidColorBrush x:Key="AccentPinkBrush" Color="{StaticResource AccentPink}"/>
+            <SolidColorBrush x:Key="AccentCyanBrush" Color="{StaticResource AccentCyan}"/>
+            <SolidColorBrush x:Key="TextLightBrush" Color="{StaticResource TextLight}"/>
+            <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}"/>
+            <SolidColorBrush x:Key="SuccessGreenBrush" Color="{StaticResource SuccessGreen}"/>
+            
+            <!-- Gradient Backgrounds -->
+            <LinearGradientBrush x:Key="MainBackgroundGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#1a1a2e" Offset="0"/>
+                <GradientStop Color="#16213e" Offset="0.5"/>
+                <GradientStop Color="#0f3460" Offset="1"/>
+            </LinearGradientBrush>
+            
+            <LinearGradientBrush x:Key="CardBackgroundGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#1e2a4a" Offset="0"/>
+                <GradientStop Color="#162447" Offset="1"/>
+            </LinearGradientBrush>
+            
+            <LinearGradientBrush x:Key="AccentButtonGradient" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#e94560" Offset="0"/>
+                <GradientStop Color="#ff6b9d" Offset="1"/>
+            </LinearGradientBrush>
+            
+            <LinearGradientBrush x:Key="CyanButtonGradient" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#00d9ff" Offset="0"/>
+                <GradientStop Color="#00ffcc" Offset="1"/>
+            </LinearGradientBrush>
+            
+            <!-- Modern Window Style -->
+            <Style x:Key="ModernWindow" TargetType="Window">
+                <Setter Property="Background" Value="{StaticResource MainBackgroundGradient}"/>
+                <Setter Property="FontFamily" Value="Segoe UI"/>
+                <Setter Property="WindowStyle" Value="SingleBorderWindow"/>
+            </Style>
+            
+            <!-- Modern Button Style -->
+            <Style x:Key="ModernButton" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource AccentBlueBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="20,12"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" 
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    Padding="{TemplateBinding Padding}">
+                                <Border.Effect>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" Color="Black"/>
+                                </Border.Effect>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#1a4a7a"/>
+                                    <Setter TargetName="border" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect ShadowDepth="3" BlurRadius="12" Opacity="0.4" Color="#00d9ff"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!-- Accent Button Style (Pink) -->
+            <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+                <Setter Property="Background" Value="{StaticResource AccentButtonGradient}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" 
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    Padding="{TemplateBinding Padding}">
+                                <Border.Effect>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="10" Opacity="0.4" Color="#e94560"/>
+                                </Border.Effect>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect ShadowDepth="4" BlurRadius="16" Opacity="0.6" Color="#e94560"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!-- Game Cell Button Style -->
+            <Style x:Key="GameCellButton" TargetType="Button">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#1e2a4a" Offset="0"/>
+                            <GradientStop Color="#0f3460" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="{StaticResource AccentCyanBrush}"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="BorderBrush" Value="#2a3f5f"/>
+                <Setter Property="FontSize" Value="48"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" 
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="12">
+                                <Border.Effect>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.3" Color="Black"/>
+                                </Border.Effect>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentCyanBrush}"/>
+                                    <Setter TargetName="border" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect ShadowDepth="0" BlurRadius="15" Opacity="0.5" Color="#00d9ff"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.7"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!-- Modern TextBox Style -->
+            <Style x:Key="ModernTextBox" TargetType="TextBox">
+                <Setter Property="Background" Value="#1e2a4a"/>
+                <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                <Setter Property="BorderBrush" Value="#2a3f5f"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="Padding" Value="12,10"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="CaretBrush" Value="{StaticResource AccentCyanBrush}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border x:Name="border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="8">
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentCyanBrush}"/>
+                                    <Setter TargetName="border" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect ShadowDepth="0" BlurRadius="10" Opacity="0.3" Color="#00d9ff"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!-- Modern ComboBox Style -->
+            <Style x:Key="ModernComboBox" TargetType="ComboBox">
+                <Setter Property="Background" Value="#1e2a4a"/>
+                <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                <Setter Property="BorderBrush" Value="#2a3f5f"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="Padding" Value="12,10"/>
+                <Setter Property="FontSize" Value="14"/>
+            </Style>
+            
+            <!-- Modern RadioButton Style -->
+            <Style x:Key="ModernRadioButton" TargetType="RadioButton">
+                <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="border" 
+                                    Background="#1e2a4a" 
+                                    BorderBrush="#2a3f5f" 
+                                    BorderThickness="2" 
+                                    CornerRadius="8" 
+                                    Padding="15,12">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse x:Name="radioOuter" 
+                                             Width="20" Height="20" 
+                                             Stroke="#2a3f5f" 
+                                             StrokeThickness="2" 
+                                             Fill="Transparent"
+                                             Margin="0,0,10,0"/>
+                                    <ContentPresenter VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentCyanBrush}"/>
+                                    <Setter TargetName="radioOuter" Property="Stroke" Value="{StaticResource AccentCyanBrush}"/>
+                                    <Setter TargetName="radioOuter" Property="Fill" Value="{StaticResource AccentCyanBrush}"/>
+                                    <Setter TargetName="border" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect ShadowDepth="0" BlurRadius="10" Opacity="0.3" Color="#00d9ff"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#3a5f8f"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!-- Card Panel Style -->
+            <Style x:Key="CardPanel" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource CardBackgroundGradient}"/>
+                <Setter Property="CornerRadius" Value="16"/>
+                <Setter Property="Padding" Value="20"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect ShadowDepth="4" BlurRadius="15" Opacity="0.3" Color="Black"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!-- Title Text Style -->
+            <Style x:Key="TitleText" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                <Setter Property="FontSize" Value="28"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+            </Style>
+            
+            <!-- Subtitle Text Style -->
+            <Style x:Key="SubtitleText" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+            </Style>
+            
+            <!-- Label Text Style -->
+            <Style x:Key="LabelText" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Margin" Value="0,0,0,8"/>
+            </Style>
+            
+            <!-- Status Text Style -->
+            <Style x:Key="StatusText" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource AccentCyanBrush}"/>
+                <Setter Property="FontSize" Value="22"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+            </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
