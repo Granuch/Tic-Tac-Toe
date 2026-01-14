@@ -111,7 +111,7 @@ GameResults
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/tic-tac-toe-wpf.git
+   git clone https://github.com/Granuch/tic-tac-toe-wpf.git
    cd tic-tac-toe-wpf
    ```
 
