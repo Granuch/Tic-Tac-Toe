@@ -1,9 +1,9 @@
 ﻿<Window x:Class="Tic_Tac_Toe.Views.PlayerSelectionWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Вибір гравців" Height="712" Width="539"
-        Style="{StaticResource ModernWindow}"
-        WindowStartupLocation="CenterScreen">
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+Title="{DynamicResource PlayerSelection}" Height="712" Width="539"
+Style="{StaticResource ModernWindow}"
+WindowStartupLocation="CenterScreen">
 
     <Grid>
         <!-- Background decoration -->
@@ -30,17 +30,17 @@
 
         <StackPanel Margin="30">
             <!-- Header -->
-            <TextBlock Text="🎮 TIC-TAC-TOE" 
+            <TextBlock Text="{DynamicResource AppTitle}" 
                        Style="{StaticResource TitleText}"
                        Margin="0,10,0,5"/>
-            <TextBlock Text="Choose your game settings" 
+            <TextBlock Text="{DynamicResource ChooseGameSettings}" 
                        Style="{StaticResource SubtitleText}"
                        Margin="0,0,0,25"/>
 
             <!-- Game Mode Card -->
             <Border Style="{StaticResource CardPanel}" Margin="0,0,0,20">
                 <StackPanel>
-                    <TextBlock Text="🎯 Режим гри" 
+                    <TextBlock Text="{DynamicResource GameMode}" 
                                Style="{StaticResource LabelText}"
                                FontSize="16" Margin="0,0,0,15"/>
 
@@ -52,13 +52,13 @@
                         </Grid.ColumnDefinitions>
 
                         <RadioButton x:Name="RadioPvP" 
-                                     Content="👥 Гравець vs Гравець" 
+                                     Content="{DynamicResource PlayerVsPlayer}" 
                                      IsChecked="True" 
                                      GroupName="GameMode"
                                      Style="{StaticResource ModernRadioButton}"
                                      Grid.Column="0"/>
                         <RadioButton x:Name="RadioPvE" 
-                                     Content="🤖 Гра з Ботом" 
+                                     Content="{DynamicResource PlayWithBot}" 
                                      GroupName="GameMode"
                                      Style="{StaticResource ModernRadioButton}"
                                      Grid.Column="2"/>
@@ -69,10 +69,16 @@
             <!-- Player X Card -->
             <Border Style="{StaticResource CardPanel}" Margin="0,0,0,20">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource LabelText}" FontSize="16">
-                        <Run Text="Гравець X " Foreground="#00d9ff"/>
-                        <Run Text="(Хрестики)" Foreground="#8892b0"/>
-                    </TextBlock>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{DynamicResource PlayerX}" 
+                                   Style="{StaticResource LabelText}" 
+                                   FontSize="16" 
+                                   Foreground="#00d9ff"/>
+                        <TextBlock Text="{DynamicResource Crosses}" 
+                                   Style="{StaticResource LabelText}" 
+                                   FontSize="16" 
+                                   Foreground="#8892b0"/>
+                    </StackPanel>
                     <TextBox x:Name="TxtPlayerX" 
                              Style="{StaticResource ModernTextBox}"/>
                 </StackPanel>
@@ -81,10 +87,16 @@
             <!-- Player O Card -->
             <Border Style="{StaticResource CardPanel}" Margin="0,0,0,20" x:Name="PanelPlayerO">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource LabelText}" FontSize="16">
-                        <Run Text="Гравець O " Foreground="#e94560"/>
-                        <Run Text="(Нолики)" Foreground="#8892b0"/>
-                    </TextBlock>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{DynamicResource PlayerO}" 
+                                   Style="{StaticResource LabelText}" 
+                                   FontSize="16" 
+                                   Foreground="#e94560"/>
+                        <TextBlock Text="{DynamicResource Noughts}" 
+                                   Style="{StaticResource LabelText}" 
+                                   FontSize="16" 
+                                   Foreground="#8892b0"/>
+                    </StackPanel>
                     <TextBox x:Name="TxtPlayerO" 
                              Style="{StaticResource ModernTextBox}"/>
                 </StackPanel>
@@ -94,22 +106,22 @@
             <Border Style="{StaticResource CardPanel}" Margin="0,0,0,20" 
                     x:Name="PanelBot" Visibility="Collapsed">
                 <StackPanel>
-                    <TextBlock Text="🤖 Складність бота" 
+                    <TextBlock Text="{DynamicResource BotDifficulty}" 
                                Style="{StaticResource LabelText}"
                                FontSize="16"/>
                     <ComboBox x:Name="CmbDifficulty" 
                               Style="{StaticResource ModernComboBox}" 
                               SelectedIndex="0"
                               Foreground="#222">
-                        <ComboBoxItem Content="😊 Легкий" Foreground="#222"/>
-                        <ComboBoxItem Content="😐 Середній" Foreground="#222"/>
-                        <ComboBoxItem Content="😈 Складний"  Foreground="#222"/>
+                        <ComboBoxItem Content="{DynamicResource DifficultyEasy}" Foreground="#222"/>
+                        <ComboBoxItem Content="{DynamicResource DifficultyMedium}" Foreground="#222"/>
+                        <ComboBoxItem Content="{DynamicResource DifficultyHard}" Foreground="#222"/>
                     </ComboBox>
                 </StackPanel>
             </Border>
 
             <!-- Start Button -->
-            <Button Content="🚀 Почати гру" 
+            <Button Content="{DynamicResource StartGame}" 
                     Click="StartGame_Click" 
                     Style="{StaticResource AccentButton}"
                     FontSize="18"

@@ -1,0 +1,67 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- Common -->
+    <sys:String x:Key="AppTitle">🎮 TIC-TAC-TOE</sys:String>
+    <sys:String x:Key="Close">✕ Закрити</sys:String>
+    <sys:String x:Key="Settings">⚙ Налаштування</sys:String>
+    
+    <!-- Main Window -->
+    <sys:String x:Key="MainSubtitle">Класична стратегічна гра</sys:String>
+    <sys:String x:Key="Restart">🔄 Рестарт</sys:String>
+    <sys:String x:Key="Statistics">📊 Статистика</sys:String>
+    <sys:String x:Key="BackToMenu">◀ Повернутися в меню</sys:String>
+    <sys:String x:Key="ConfirmBackToMenu">Ви впевнені, що хочете повернутися в меню?
+Поточна гра буде завершена.</sys:String>
+    <sys:String x:Key="Confirmation">Підтвердження</sys:String>
+    
+    <!-- Player Selection Window -->
+    <sys:String x:Key="PlayerSelection">Вибір гравців</sys:String>
+    <sys:String x:Key="ChooseGameSettings">Виберіть налаштування гри</sys:String>
+    <sys:String x:Key="GameMode">🎯 Режим гри</sys:String>
+    <sys:String x:Key="PlayerVsPlayer">👥 Гравець vs Гравець</sys:String>
+    <sys:String x:Key="PlayWithBot">🤖 Гра з Ботом</sys:String>
+    <sys:String x:Key="PlayerX">Гравець X </sys:String>
+    <sys:String x:Key="Crosses">(Хрестики)</sys:String>
+    <sys:String x:Key="PlayerO">Гравець O </sys:String>
+    <sys:String x:Key="Noughts">(Нолики)</sys:String>
+    <sys:String x:Key="BotDifficulty">🤖 Складність бота</sys:String>
+    <sys:String x:Key="DifficultyEasy">😊 Легкий</sys:String>
+    <sys:String x:Key="DifficultyMedium">😐 Середній</sys:String>
+    <sys:String x:Key="DifficultyHard">😈 Складний</sys:String>
+    <sys:String x:Key="StartGame">🚀 Почати гру</sys:String>
+    
+    <!-- Statistics Window -->
+    <sys:String x:Key="StatisticsTitle">📊 СТАТИСТИКА</sys:String>
+    <sys:String x:Key="TrackPerformance">Відстежуйте свою ефективність</sys:String>
+    <sys:String x:Key="SelectPlayer">👤 Виберіть гравця</sys:String>
+    <sys:String x:Key="SelectPlayerToView">🎯 Оберіть гравця для перегляду статистики</sys:String>
+    <sys:String x:Key="GameHistory">📜 Історія ігор</sys:String>
+    <sys:String x:Key="PlayerStats">Статистика гравця: {0}</sys:String>
+    <sys:String x:Key="TotalGames">Всього ігор: {0}</sys:String>
+    <sys:String x:Key="Wins">Перемог: {0}</sys:String>
+    <sys:String x:Key="Draws">Нічиїх: {0}</sys:String>
+    <sys:String x:Key="Losses">Поразок: {0}</sys:String>
+    <sys:String x:Key="WinRate">Відсоток перемог: {0:F1}%</sys:String>
+    <sys:String x:Key="HistoryHeader">Історія останніх 10 ігор:</sys:String>
+    <sys:String x:Key="Win">✓ Перемога</sys:String>
+    <sys:String x:Key="Draw">= Нічия</sys:String>
+    <sys:String x:Key="Loss">✗ Поразка</sys:String>
+    <sys:String x:Key="Duration">Тривалість: {0:mm\:ss}</sys:String>
+    <sys:String x:Key="NoGamesYet">Ще не зіграно жодної гри</sys:String>
+    
+    <!-- Settings Window -->
+    <sys:String x:Key="SettingsTitle">⚙ НАЛАШТУВАННЯ</sys:String>
+    <sys:String x:Key="SettingsSubtitle">Налаштуйте свій досвід</sys:String>
+    <sys:String x:Key="Language">🌐 Мова</sys:String>
+    
+    <!-- Errors -->
+    <sys:String x:Key="ErrorLoadingPlayers">Помилка завантаження гравців: {0}</sys:String>
+    <sys:String x:Key="UnexpectedError">Неочікувана помилка: {0}</sys:String>
+    <sys:String x:Key="CriticalError">Критична помилка</sys:String>
+    <sys:String x:Key="StartupError">Помилка запуску додатку: {0}
+
+Переконайтесь, що SQL Server LocalDB встановлено.</sys:String>
+    
+</ResourceDictionary>

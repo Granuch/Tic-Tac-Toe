@@ -2,7 +2,7 @@
 <Window x:Class="Tic_Tac_Toe.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Tic-Tac-Toe" Width="482" Height="705"
+        Title="Tic-Tac-Toe" Width="488" Height="729"
         Style="{StaticResource ModernWindow}"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing">
@@ -32,10 +32,10 @@
 
         <StackPanel Margin="25">
             <!-- Header -->
-            <TextBlock Text="🎮 TIC-TAC-TOE" 
+            <TextBlock Text="{DynamicResource AppTitle}" 
                        Style="{StaticResource TitleText}"
                        Margin="0,10,0,5"/>
-            <TextBlock Text="Classic strategy game" 
+            <TextBlock Text="{DynamicResource MainSubtitle}" 
                        Style="{StaticResource SubtitleText}"
                        Margin="0,0,0,20"/>
 
@@ -89,20 +89,33 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0" 
-                        Content="🔄 Рестарт" 
+                        Content="{DynamicResource Restart}" 
                         Command="{Binding RestartCommand}" 
                         Style="{StaticResource ModernButton}"/>
 
                 <Button Grid.Column="2" 
-                        Content="📊 Статистика" 
+                        Content="{DynamicResource Statistics}" 
                         Click="Statistics_Click"
                         Style="{StaticResource ModernButton}"/>
             </Grid>
 
-            <Button Content="◀ Повернутися в меню" 
-                    Click="BackToMenu_Click"
-                    Style="{StaticResource AccentButton}"
-                    Margin="0,5,0,0"/>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Content="{DynamicResource Settings}" 
+                        Click="Settings_Click"
+                        Style="{StaticResource ModernButton}"/>
+
+                <Button Grid.Column="2"
+                        Content="{DynamicResource BackToMenu}" 
+                        Click="BackToMenu_Click"
+                        Style="{StaticResource AccentButton}"/>
+            </Grid>
         </StackPanel>
     </Grid>
 </Window>

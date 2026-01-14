@@ -1,0 +1,67 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- Common -->
+    <sys:String x:Key="AppTitle">🎮 TIC-TAC-TOE</sys:String>
+    <sys:String x:Key="Close">✕ Close</sys:String>
+    <sys:String x:Key="Settings">⚙ Settings</sys:String>
+    
+    <!-- Main Window -->
+    <sys:String x:Key="MainSubtitle">Classic strategy game</sys:String>
+    <sys:String x:Key="Restart">🔄 Restart</sys:String>
+    <sys:String x:Key="Statistics">📊 Statistics</sys:String>
+    <sys:String x:Key="BackToMenu">◀ Back to menu</sys:String>
+    <sys:String x:Key="ConfirmBackToMenu">Are you sure you want to return to menu?
+The current game will be ended.</sys:String>
+    <sys:String x:Key="Confirmation">Confirmation</sys:String>
+    
+    <!-- Player Selection Window -->
+    <sys:String x:Key="PlayerSelection">Player Selection</sys:String>
+    <sys:String x:Key="ChooseGameSettings">Choose your game settings</sys:String>
+    <sys:String x:Key="GameMode">🎯 Game Mode</sys:String>
+    <sys:String x:Key="PlayerVsPlayer">👥 Player vs Player</sys:String>
+    <sys:String x:Key="PlayWithBot">🤖 Play with Bot</sys:String>
+    <sys:String x:Key="PlayerX">Player X </sys:String>
+    <sys:String x:Key="Crosses">(Crosses)</sys:String>
+    <sys:String x:Key="PlayerO">Player O </sys:String>
+    <sys:String x:Key="Noughts">(Noughts)</sys:String>
+    <sys:String x:Key="BotDifficulty">🤖 Bot Difficulty</sys:String>
+    <sys:String x:Key="DifficultyEasy">😊 Easy</sys:String>
+    <sys:String x:Key="DifficultyMedium">😐 Medium</sys:String>
+    <sys:String x:Key="DifficultyHard">😈 Hard</sys:String>
+    <sys:String x:Key="StartGame">🚀 Start Game</sys:String>
+    
+    <!-- Statistics Window -->
+    <sys:String x:Key="StatisticsTitle">📊 STATISTICS</sys:String>
+    <sys:String x:Key="TrackPerformance">Track your game performance</sys:String>
+    <sys:String x:Key="SelectPlayer">👤 Select Player</sys:String>
+    <sys:String x:Key="SelectPlayerToView">🎯 Select a player to view statistics</sys:String>
+    <sys:String x:Key="GameHistory">📜 Game History</sys:String>
+    <sys:String x:Key="PlayerStats">Player Statistics: {0}</sys:String>
+    <sys:String x:Key="TotalGames">Total Games: {0}</sys:String>
+    <sys:String x:Key="Wins">Wins: {0}</sys:String>
+    <sys:String x:Key="Draws">Draws: {0}</sys:String>
+    <sys:String x:Key="Losses">Losses: {0}</sys:String>
+    <sys:String x:Key="WinRate">Win Rate: {0:F1}%</sys:String>
+    <sys:String x:Key="HistoryHeader">Last 10 games history:</sys:String>
+    <sys:String x:Key="Win">✓ Win</sys:String>
+    <sys:String x:Key="Draw">= Draw</sys:String>
+    <sys:String x:Key="Loss">✗ Loss</sys:String>
+    <sys:String x:Key="Duration">Duration: {0:mm\:ss}</sys:String>
+    <sys:String x:Key="NoGamesYet">No games played yet</sys:String>
+    
+    <!-- Settings Window -->
+    <sys:String x:Key="SettingsTitle">⚙ SETTINGS</sys:String>
+    <sys:String x:Key="SettingsSubtitle">Customize your experience</sys:String>
+    <sys:String x:Key="Language">🌐 Language</sys:String>
+    
+    <!-- Errors -->
+    <sys:String x:Key="ErrorLoadingPlayers">Error loading players: {0}</sys:String>
+    <sys:String x:Key="UnexpectedError">Unexpected error: {0}</sys:String>
+    <sys:String x:Key="CriticalError">Critical Error</sys:String>
+    <sys:String x:Key="StartupError">Application startup error: {0}
+
+Please ensure SQL Server LocalDB is installed.</sys:String>
+    
+</ResourceDictionary>

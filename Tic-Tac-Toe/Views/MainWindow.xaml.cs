@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using Tic_Tac_Toe.Services.Interfaces;
+using Tic_Tac_Toe.Services;
 
 namespace Tic_Tac_Toe.Views
 {
@@ -8,11 +8,13 @@ namespace Tic_Tac_Toe.Views
     {
         private bool _isReturningToMenu = false;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILocalizationService _localizationService;
 
-        public MainWindow(IServiceProvider serviceProvider)
+        public MainWindow(IServiceProvider serviceProvider, ILocalizationService localizationService)
         {
             InitializeComponent();
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
 
             System.Diagnostics.Debug.WriteLine("MainWindow constructor called");
         }
@@ -23,11 +25,17 @@ namespace Tic_Tac_Toe.Views
             statsWindow.ShowDialog();
         }
 
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsWindow = _serviceProvider.GetRequiredService<SettingsWindow>();
+            settingsWindow.ShowDialog();
+        }
+
         private async void BackToMenu_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show(
-                "Ви впевнені, що хочете повернутися в меню?\nПоточна гра буде завершена.",
-                "Підтвердження",
+                _localizationService.GetString("ConfirmBackToMenu"),
+                _localizationService.GetString("Confirmation"),
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 

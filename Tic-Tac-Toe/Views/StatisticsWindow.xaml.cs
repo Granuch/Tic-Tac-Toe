@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using Tic_Tac_Toe.Models;
 using Tic_Tac_Toe.Services;
@@ -11,15 +10,18 @@ namespace Tic_Tac_Toe.Views
     {
         private readonly IPlayerService _playerService;
         private readonly IGameResultService _gameResultService;
+        private readonly ILocalizationService _localizationService;
 
         public StatisticsWindow(
             IPlayerService playerService,
-            IGameResultService gameResultService)
+            IGameResultService gameResultService,
+            ILocalizationService localizationService)
         {
             InitializeComponent();
 
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _gameResultService = gameResultService ?? throw new ArgumentNullException(nameof(gameResultService));
+            _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
 
             LoadPlayers();
         }
@@ -32,7 +34,7 @@ namespace Tic_Tac_Toe.Views
 
                 if (playersResult.IsFailure)
                 {
-                    ShowError($"Помилка завантаження гравців: {playersResult.Error}");
+                    ShowError(string.Format(_localizationService.GetString("ErrorLoadingPlayers"), playersResult.Error));
                     return;
                 }
 
@@ -40,7 +42,7 @@ namespace Tic_Tac_Toe.Views
             }
             catch (Exception ex)
             {
-                ShowError($"Неочікувана помилка: {ex.Message}");
+                ShowError(string.Format(_localizationService.GetString("UnexpectedError"), ex.Message));
             }
         }
 
@@ -71,43 +73,43 @@ namespace Tic_Tac_Toe.Views
 
                 var history = historyResult.Value;
 
-                TxtStats.Text = $"Статистика гравця: {player.Name}\n\n" +
-                               $"Всього ігор: {stats.TotalGames}\n" +
-                               $"Перемог: {stats.Wins}\n" +
-                               $"Нічиїх: {stats.Draws}\n" +
-                               $"Поразок: {stats.Losses}\n\n";
+                TxtStats.Text = string.Format(_localizationService.GetString("PlayerStats"), player.Name) + "\n\n" +
+                               string.Format(_localizationService.GetString("TotalGames"), stats.TotalGames) + "\n" +
+                               string.Format(_localizationService.GetString("Wins"), stats.Wins) + "\n" +
+                               string.Format(_localizationService.GetString("Draws"), stats.Draws) + "\n" +
+                               string.Format(_localizationService.GetString("Losses"), stats.Losses) + "\n\n";
 
                 if (stats.TotalGames > 0)
                 {
-                    TxtStats.Text += $"Відсоток перемог: {stats.WinRate:F1}%";
+                    TxtStats.Text += string.Format(_localizationService.GetString("WinRate"), stats.WinRate);
                 }
 
                 if (history.Any())
                 {
                     TxtHistory.Text = "\n━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-                                     "Історія останніх 10 ігор:\n" +
+                                     _localizationService.GetString("HistoryHeader") + "\n" +
                                      "━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
 
                     foreach (var game in history)
                     {
                         string result = game.Winner == player.Id.ToString()
-                            ? "✓ Перемога"
+                            ? _localizationService.GetString("Win")
                             : game.Winner == "Draw"
-                                ? "= Нічия"
-                                : "✗ Поразка";
+                                ? _localizationService.GetString("Draw")
+                                : _localizationService.GetString("Loss");
 
                         TxtHistory.Text += $"{game.PlayedAt:dd.MM.yyyy HH:mm} - {result}\n" +
-                                         $"Тривалість: {game.Duration:mm\\:ss}\n\n";
+                                         string.Format(_localizationService.GetString("Duration"), game.Duration) + "\n\n";
                     }
                 }
                 else
                 {
-                    TxtHistory.Text = "\nІсторія ігор порожня";
+                    TxtHistory.Text = "\n" + _localizationService.GetString("NoGamesYet");
                 }
             }
             catch (Exception ex)
             {
-                ShowError($"Неочікувана помилка: {ex.Message}");
+                ShowError(string.Format(_localizationService.GetString("UnexpectedError"), ex.Message));
             }
         }
 
@@ -115,7 +117,7 @@ namespace Tic_Tac_Toe.Views
         {
             MessageBox.Show(
                 message,
-                "Помилка",
+                _localizationService.GetString("CriticalError"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }

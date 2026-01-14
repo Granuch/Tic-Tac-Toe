@@ -30,6 +30,9 @@ namespace Tic_Tac_Toe
 
         private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
         {
+            // Localization - must be singleton to persist across scopes
+            services.AddSingleton<ILocalizationService, LocalizationService>();
+
             // Database Context
             services.AddDbContext<GameContext>(options =>
                    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
@@ -52,11 +55,15 @@ namespace Tic_Tac_Toe
             services.AddTransient<MainWindow>();
             services.AddTransient<PlayerSelectionWindow>();
             services.AddTransient<StatisticsWindow>();
+            services.AddTransient<SettingsWindow>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)
         {
             await _host.StartAsync();
+
+            // Initialize localization before showing any windows (this loads the saved language)
+            var localizationService = _host.Services.GetRequiredService<ILocalizationService>();
 
             this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
@@ -76,8 +83,8 @@ namespace Tic_Tac_Toe
                 System.Diagnostics.Debug.WriteLine($"Inner: {ex.InnerException?.Message}");
 
                 MessageBox.Show(
-                    $"Помилка запуску додатку: {ex.Message}\n\nПереконайтесь, що SQL Server LocalDB встановлено.",
-                    "Критична помилка",
+                    string.Format(localizationService.GetString("StartupError"), ex.Message),
+                    localizationService.GetString("CriticalError"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
 
@@ -159,9 +166,10 @@ namespace Tic_Tac_Toe
                     System.Diagnostics.Debug.WriteLine($"Message: {initEx.Message}");
                     System.Diagnostics.Debug.WriteLine($"StackTrace: {initEx.StackTrace}");
 
+                    var localizationService = _host.Services.GetRequiredService<ILocalizationService>();
                     MessageBox.Show(
-                        $"Помилка ініціалізації: {initEx.Message}",
-                        "Помилка",
+                        string.Format(localizationService.GetString("UnexpectedError"), initEx.Message),
+                        localizationService.GetString("CriticalError"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
 
