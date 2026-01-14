@@ -63,5 +63,18 @@
     <sys:String x:Key="StartupError">Помилка запуску додатку: {0}
 
 Переконайтесь, що SQL Server LocalDB встановлено.</sys:String>
+    <sys:String x:Key="Error">Помилка</sys:String>
+    
+    <!-- Game Status -->
+    <sys:String x:Key="Initializing">Ініціалізація...</sys:String>
+    <sys:String x:Key="LoadingPlayers">Завантаження гравців...</sys:String>
+    <sys:String x:Key="ErrorLoadingPlayerX">Помилка завантаження гравця X</sys:String>
+    <sys:String x:Key="ErrorLoadingPlayerO">Помилка завантаження гравця O</sys:String>
+    <sys:String x:Key="PlayersNotInitialized">Помилка: гравці не ініціалізовані</sys:String>
+    <sys:String x:Key="PlayerTurn">Хід гравця {0} ({1})</sys:String>
+    <sys:String x:Key="BotThinking">Бот думає...</sys:String>
+    <sys:String x:Key="PlayerWon">{0} переміг!</sys:String>
+    <sys:String x:Key="DrawResult">Нічия!</sys:String>
+    <sys:String x:Key="GameEndedNotSaved">Гру завершено (результат не збережено)</sys:String>
     
 </ResourceDictionary>

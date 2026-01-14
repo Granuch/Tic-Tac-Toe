@@ -14,6 +14,7 @@ namespace Tic_Tac_Toe.ViewModels
         private readonly IGameEngine _engine;
         private readonly IPlayerService _playerService;
         private readonly IGameResultService _gameResultService;
+        private readonly ILocalizationService _localizationService;
         private readonly Stopwatch _gameTimer;
         private IBotPlayerService? _bot;
 
@@ -38,13 +39,15 @@ namespace Tic_Tac_Toe.ViewModels
         public GameViewModel(
             IGameEngine gameEngine,
             IPlayerService playerService,
-            IGameResultService gameResultService)
+            IGameResultService gameResultService,
+            ILocalizationService localizationService)
         {
             Debug.WriteLine("GameViewModel constructor called");
 
             _engine = gameEngine ?? throw new ArgumentNullException(nameof(gameEngine));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _gameResultService = gameResultService ?? throw new ArgumentNullException(nameof(gameResultService));
+            _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
             _gameTimer = new Stopwatch();
 
             Board = new ObservableCollection<string>(new string[9]);
@@ -54,7 +57,7 @@ namespace Tic_Tac_Toe.ViewModels
             _isGameActive = false;
             _isInitialized = false;
             _isBotThinking = false;
-            _statusText = "Ініціалізація...";
+            _statusText = _localizationService.GetString("Initializing");
 
             Debug.WriteLine("GameViewModel constructor completed");
         }
@@ -69,14 +72,14 @@ namespace Tic_Tac_Toe.ViewModels
             try
             {
                 Debug.WriteLine($"=== InitializeAsync START ===");
-                StatusText = "Завантаження гравців...";
+                StatusText = _localizationService.GetString("LoadingPlayers");
 
                 _isPlayingWithBot = isPlayingWithBot;
 
                 var playerXResult = await _playerService.GetOrCreatePlayerAsync(playerXName);
                 if (playerXResult.IsFailure)
                 {
-                    StatusText = "Помилка завантаження гравця X";
+                    StatusText = _localizationService.GetString("ErrorLoadingPlayerX");
                     await ShowErrorAsync(playerXResult.Error);
                     return;
                 }
@@ -86,7 +89,7 @@ namespace Tic_Tac_Toe.ViewModels
                 var playerOResult = await _playerService.GetOrCreatePlayerAsync(playerOName);
                 if (playerOResult.IsFailure)
                 {
-                    StatusText = "Помилка завантаження гравця O";
+                    StatusText = _localizationService.GetString("ErrorLoadingPlayerO");
                     await ShowErrorAsync(playerOResult.Error);
                     return;
                 }
@@ -106,8 +109,8 @@ namespace Tic_Tac_Toe.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine($"=== UNEXPECTED ERROR in InitializeAsync: {ex.Message} ===");
-                StatusText = "Критична помилка!";
-                await ShowErrorAsync($"Неочікувана помилка: {ex.Message}");
+                StatusText = _localizationService.GetString("CriticalError");
+                await ShowErrorAsync(string.Format(_localizationService.GetString("UnexpectedError"), ex.Message));
             }
         }
 
@@ -117,7 +120,7 @@ namespace Tic_Tac_Toe.ViewModels
 
             if (!_isInitialized || _playerX == null || _playerO == null)
             {
-                var error = "Помилка: гравці не ініціалізовані";
+                var error = _localizationService.GetString("PlayersNotInitialized");
                 Debug.WriteLine(error);
                 StatusText = error;
                 return;
@@ -129,7 +132,7 @@ namespace Tic_Tac_Toe.ViewModels
             _isBotThinking = false;
             _gameTimer.Restart();
 
-            StatusText = $"Хід гравця {_playerX.Name} (X)";
+            StatusText = string.Format(_localizationService.GetString("PlayerTurn"), _playerX.Name, "X");
 
             Debug.WriteLine($"=== Game started: {_playerX.Name} vs {_playerO.Name} ===");
         }
@@ -159,7 +162,7 @@ namespace Tic_Tac_Toe.ViewModels
             else
             {
                 var currentPlayerName = _engine.CurrentPlayer == 'X' ? _playerX?.Name : _playerO?.Name;
-                StatusText = $"Хід гравця {currentPlayerName} ({_engine.CurrentPlayer})";
+                StatusText = string.Format(_localizationService.GetString("PlayerTurn"), currentPlayerName, _engine.CurrentPlayer);
             }
         }
 
@@ -168,7 +171,7 @@ namespace Tic_Tac_Toe.ViewModels
             if (_bot == null) return;
 
             _isBotThinking = true;
-            StatusText = "Бот думає...";
+            StatusText = _localizationService.GetString("BotThinking");
 
             var timer = new System.Windows.Threading.DispatcherTimer
             {
@@ -192,7 +195,7 @@ namespace Tic_Tac_Toe.ViewModels
                     }
 
                     _engine.SwitchPlayer();
-                    StatusText = $"Хід гравця {_playerX?.Name} (X)";
+                    StatusText = string.Format(_localizationService.GetString("PlayerTurn"), _playerX?.Name, "X");
                 }
 
                 _isBotThinking = false;
@@ -210,7 +213,7 @@ namespace Tic_Tac_Toe.ViewModels
                 _isGameActive = false;
 
                 var winner = _engine.CurrentPlayer == 'X' ? _playerX : _playerO;
-                StatusText = $"{winner?.Name} переміг!";
+                StatusText = string.Format(_localizationService.GetString("PlayerWon"), winner?.Name);
 
                 if (winner != null)
                 {
@@ -223,7 +226,7 @@ namespace Tic_Tac_Toe.ViewModels
             {
                 _gameTimer.Stop();
                 _isGameActive = false;
-                StatusText = "Нічия!";
+                StatusText = _localizationService.GetString("DrawResult");
 
                 _ = SaveGameResult("Draw");
                 return true;
@@ -240,7 +243,7 @@ namespace Tic_Tac_Toe.ViewModels
                 _isGameActive = false;
 
                 var winner = _engine.CurrentPlayer == 'X' ? _playerX : _playerO;
-                StatusText = $"{winner?.Name} переміг!";
+                StatusText = string.Format(_localizationService.GetString("PlayerWon"), winner?.Name);
 
                 if (winner != null)
                 {
@@ -253,7 +256,7 @@ namespace Tic_Tac_Toe.ViewModels
             {
                 _gameTimer.Stop();
                 _isGameActive = false;
-                StatusText = "Нічия!";
+                StatusText = _localizationService.GetString("DrawResult");
 
                 await SaveGameResult("Draw");
                 return true;
@@ -290,7 +293,7 @@ namespace Tic_Tac_Toe.ViewModels
                 if (result.IsFailure)
                 {
                     Debug.WriteLine($"Failed to save game result: {result.Error}");
-                    StatusText = "Гру завершено (результат не збережено)";
+                    StatusText = _localizationService.GetString("GameEndedNotSaved");
                 }
                 else
                 {
@@ -317,7 +320,7 @@ namespace Tic_Tac_Toe.ViewModels
             {
                 MessageBox.Show(
                     message,
-                    "Помилка",
+                    _localizationService.GetString("Error"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             });

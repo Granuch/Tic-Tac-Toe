@@ -63,5 +63,18 @@ The current game will be ended.</sys:String>
     <sys:String x:Key="StartupError">Application startup error: {0}
 
 Please ensure SQL Server LocalDB is installed.</sys:String>
+    <sys:String x:Key="Error">Error</sys:String>
+    
+    <!-- Game Status -->
+    <sys:String x:Key="Initializing">Initializing...</sys:String>
+    <sys:String x:Key="LoadingPlayers">Loading players...</sys:String>
+    <sys:String x:Key="ErrorLoadingPlayerX">Error loading player X</sys:String>
+    <sys:String x:Key="ErrorLoadingPlayerO">Error loading player O</sys:String>
+    <sys:String x:Key="PlayersNotInitialized">Error: players not initialized</sys:String>
+    <sys:String x:Key="PlayerTurn">{0}'s turn ({1})</sys:String>
+    <sys:String x:Key="BotThinking">Bot is thinking...</sys:String>
+    <sys:String x:Key="PlayerWon">{0} won!</sys:String>
+    <sys:String x:Key="DrawResult">Draw!</sys:String>
+    <sys:String x:Key="GameEndedNotSaved">Game ended (result not saved)</sys:String>
     
 </ResourceDictionary>
