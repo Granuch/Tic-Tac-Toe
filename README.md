@@ -595,6 +595,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Granuch**
 - GitHub: [@Granuch](https://github.com/Granuch)
-- Project Link: [https://github.com/Granuch/tic-tac-toe-wpf](https://github.com/Granuch/tic-tac-toe-wpf)
+- Project Link: [[https://github.com/Granuch/tic-tac-toe-wpf](https://github.com/Granuch/tic-tac-toe-wpf)](https://github.com/Granuch/Tic-Tac-Toe)
 
 ⭐ **If you find this project helpful, please consider giving it a star!**
